@@ -51,6 +51,11 @@ a simple "reach the target" mini-game.
 **Phase 6 — Polish:** README (project overview, Mermaid architecture diagram, results table,
 "Limitations" section, how to run), instructions for recording a demo GIF,
 one-command demo (`uv run neurolink demo`).
+README must include a "Data & License" section with both PhysioNet citations (Schalk 2009
+dataset DOI 10.13026/C28G6P and the BCI2000 paper, IEEE TBME 2004) and a note that the data
+is under the ODC-By v1.0 license. Also mention the large inter-subject variability (BCI
+illiteracy), and if the live demo uses a strong subject, state clearly that it is a best case
+and report the average.
 
 ## Rules
 - STOP at the end of every phase: summarize what you did, test results, and open questions,
@@ -66,7 +71,7 @@ one-command demo (`uv run neurolink demo`).
 Update this checklist when I approve a phase.
 - [x] Phase 0 — Plan and skeleton
 - [x] Phase 1 — Data pipeline
-- [ ] Phase 2 — Baseline (CSP + LDA)
+- [x] Phase 2 — Baseline (CSP + LDA)
 - [ ] Phase 3 — EEGNet
 - [ ] Phase 4 — Real-time system
 - [ ] Phase 5 — UI
