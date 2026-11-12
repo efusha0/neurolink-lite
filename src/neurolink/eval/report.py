@@ -63,7 +63,9 @@ def save_result(
 ) -> Path:
     results_dir.mkdir(parents=True, exist_ok=True)
     path = results_dir / f"{result.model}_{result.protocol}.json"
-    path.write_text(json.dumps(result_to_dict(result, extra), indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(result_to_dict(result, extra), indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     write_markdown_table(results_dir)
     return path
 
@@ -110,5 +112,5 @@ def write_markdown_table(results_dir: Path = RESULTS_DIR) -> Path:
             "",
         ]
     path = results_dir / RESULTS_MD
-    path.write_text("\n".join(lines), encoding="utf-8")
+    path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return path

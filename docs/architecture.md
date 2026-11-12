@@ -33,3 +33,7 @@ decisions that are not obvious from the code.
   covariance differences; electrode placement, skull conductivity and the individual
   mu/beta rhythm frequencies vary between people, so filters learned on one group rarely
   transfer. This is a well-known limitation and the motivation for EEGNet in Phase 3.
+- **CSP covariance shrinkage.** Checked on the 10 dev subjects after Phase 2 review:
+  ``reg`` in {None, ledoit_wolf, oas, 0.1} changed within-subject accuracy by at most
+  2 points (std ~21) and cross-subject by at most 2 points. Within noise; the default
+  ``ledoit_wolf`` was kept.

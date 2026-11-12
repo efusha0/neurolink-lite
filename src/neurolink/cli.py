@@ -175,9 +175,86 @@ def train_csp(
 
 
 @app.command(name="train-eegnet")
-def train_eegnet() -> None:
-    """Train and evaluate EEGNet under both evaluation protocols (Phase 3)."""
-    _not_implemented("Phase 3")
+def train_eegnet(
+    subjects: str = typer.Option("all", help='Subjects: "dev" (1-10), "all", "1-5,8".'),
+    channels: str = typer.Option("motor", help=f"Channel set: {sorted(CHANNEL_SETS)}."),
+    car: bool = typer.Option(True, help="Apply common average reference."),
+    protocol: str = typer.Option("both", help="within | cross | both"),
+    epochs_within: int = typer.Option(100, help="Training epochs per within-subject fold."),
+    epochs_cross: int = typer.Option(30, help="Training epochs per cross-subject fold."),
+    batch_size: int = typer.Option(32),
+    lr: float = typer.Option(1e-3),
+    dropout: float = typer.Option(0.5),
+    n_splits: int = typer.Option(5, help="Folds per protocol."),
+    threads: int = typer.Option(4, help="Torch CPU threads (0 = PyTorch default; 4 was fastest)."),
+    seed: int = typer.Option(SEED),
+    cache_dir: Path = typer.Option(CACHE_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """Train and evaluate EEGNet under the within- and cross-subject protocols."""
+    import time
+
+    from neurolink.data.pipeline import build_or_load
+    from neurolink.eval.plots import plot_all
+    from neurolink.eval.protocols import cross_subject_cv, within_subject_cv
+    from neurolink.eval.report import save_result
+    from neurolink.models.eegnet import EEGNetConfig
+    from neurolink.models.trainer import EEGNetClassifier, TrainConfig
+    from neurolink.utils.seed import set_seed
+
+    _setup_logging(verbose)
+    if protocol not in {"within", "cross", "both"}:
+        raise typer.BadParameter("protocol must be within, cross or both")
+    set_seed(seed)
+    config = PreprocessConfig(
+        car=car, channels=CHANNEL_SETS[channels], subjects=_subjects_option(subjects)
+    )
+    dataset, _ = build_or_load(config, cache_dir=cache_dir)
+    typer.echo(f"dataset: {dataset.X.shape}, {len(dataset.unique_subjects)} subjects")
+
+    model_name = "eegnet" if channels == "motor" else f"eegnet_{channels}"
+    model_cfg = EEGNetConfig(dropout=dropout)
+    protocols = {
+        "within": (within_subject_cv, epochs_within),
+        "cross": (cross_subject_cv, epochs_cross),
+    }
+    for name, (fn, n_epochs) in protocols.items():
+        if protocol not in {name, "both"}:
+            continue
+        train_cfg = TrainConfig(
+            epochs=n_epochs, batch_size=batch_size, lr=lr, seed=seed, num_threads=threads
+        )
+        extra: dict[str, Any] = {
+            "channels": channels, "car": car, "seed": seed, "epochs": n_epochs,
+            "batch_size": batch_size, "lr": lr, "dropout": dropout,
+        }  # fmt: skip
+
+        def factory(train_cfg: TrainConfig = train_cfg) -> Any:
+            return EEGNetClassifier(model_cfg, train_cfg)
+
+        t0 = time.perf_counter()
+        result = fn(dataset, factory, model_name, n_splits=n_splits, seed=seed)
+        extra["wall_seconds"] = time.perf_counter() - t0
+        path = save_result(result, results_dir, extra)
+        acc = result.accuracies
+        typer.echo(
+            f"{name}-subject: accuracy {100 * acc.mean():.1f} +/- {100 * acc.std(ddof=1):.1f} % "
+            f"(pooled {100 * result.pooled_accuracy:.1f} %, "
+            f"{extra['wall_seconds']:.0f} s) -> {path}"
+        )
+    plot_all(results_dir)
+
+
+@app.command()
+def report(results_dir: Path = typer.Option(RESULTS_DIR)) -> None:
+    """Regenerate results/RESULTS.md and the confusion-matrix figures from the JSON files."""
+    from neurolink.eval.plots import plot_all
+    from neurolink.eval.report import write_markdown_table
+
+    typer.echo(f"wrote {write_markdown_table(results_dir)}")
+    for p in plot_all(results_dir):
+        typer.echo(f"wrote {p}")
 
 
 @app.command()
