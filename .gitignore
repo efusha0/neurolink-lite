@@ -1,5 +1,5 @@
 # Data (never committed)
-data/
+data/*
 !data/.gitkeep
 
 # Python
