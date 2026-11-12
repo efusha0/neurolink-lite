@@ -43,25 +43,35 @@ has a truncated run; all four are detected and skipped automatically). 45 epochs
 subject, 4725 in total, chance = 50 %. Full tables and confusion matrices are in
 [`results/RESULTS.md`](results/RESULTS.md); raw numbers in `results/*.json`.
 
-| Model | Channels | Within-subject 5-fold | Cross-subject 5-fold (subject-grouped) |
-|-------|----------|----------------------:|---------------------------------------:|
-| CSP + LDA | 64 | 59.9 +/- 20.4 % (24/105 subjects >= 70 %) | 62.1 +/- 1.8 % |
-| CSP + LDA | 21 motor | 61.3 +/- 21.7 % (31/105 subjects >= 70 %) | 62.3 +/- 1.3 % |
-| EEGNet | 21 motor | _Phase 3_ | _Phase 3_ |
+| Model | Channels | Within-subject 5-fold | Cross-subject 5-fold (subject-grouped) | CPU time |
+|-------|----------|----------------------:|---------------------------------------:|---------:|
+| CSP + LDA | 64 | 59.9 +/- 20.4 % (24/105 subjects >= 70 %) | 62.1 +/- 1.8 % | 3 min |
+| CSP + LDA | 21 motor | 61.3 +/- 21.7 % (31/105 subjects >= 70 %) | 62.3 +/- 1.3 % | 0.5 min |
+| EEGNet-8,2 | 21 motor | 59.0 +/- 18.8 % (22/105 subjects >= 70 %) | **65.0 +/- 1.8 %** | 35 min |
 
 Within-subject numbers are mean over subject x fold; cross-subject over the 5 folds.
+EEGNet: 100 training epochs per within-subject fold, 30 per cross-subject fold, Adam 1e-3,
+batch 32, dropout 0.5, seed 42, 4 CPU threads. Confusion matrices:
+[`results/figures/`](results/figures/).
 
-**Reading these numbers honestly.** The baseline is weak, and that is the real picture for
-this dataset rather than a bug:
+| EEGNet cross-subject | CSP+LDA (motor) cross-subject |
+|---|---|
+| ![](results/figures/eegnet_cross_subject_cm.png) | ![](results/figures/csp_lda_motor_cross_subject_cm.png) |
 
-- *Within-subject* training uses only 36 epochs per fold, far too few to estimate 64 x 64
-  covariance matrices well, so the per-subject accuracy spread is huge (0-100 %). About a
-  quarter of subjects are clearly decodable (>= 70 %), many sit at chance; this matches the
-  well-known "BCI illiteracy" spread reported for EEGMMIDB.
-- *Cross-subject* is slightly *better* than within-subject because it trains on ~3800 epochs,
-  but it plateaus around 62 %: CSP filters do not transfer well across heads.
-- The 21-channel motor subset is as good as or better than all 64 channels, and 5-8x faster,
-  so EEGNet (Phase 3) and the real-time system use it.
+**Reading these numbers honestly.** Both models are weak in absolute terms, and that is the
+real picture for this dataset rather than a bug:
+
+- *Within-subject* training uses only 36 epochs per fold, far too few for either a 64 x 64
+  covariance estimate or a neural network, so the per-subject spread is huge (0-100 %).
+  About a quarter of subjects are clearly decodable (>= 70 %), many sit at chance; this
+  matches the well-known "BCI illiteracy" spread reported for EEGMMIDB. EEGNet and CSP+LDA
+  agree on who is decodable (per-subject correlation 0.74) and EEGNet is slightly worse here
+  (-2.3 points on average), as expected for a data-starved network.
+- *Cross-subject* trains on ~3800 epochs. CSP filters do not transfer well across heads and
+  plateau at 62 %; EEGNet learns more transferable temporal/spatial filters and reaches
+  65 %, the best number in this project. It is still far from usable for a naive user.
+- The 21-channel motor subset is as good as or better than all 64 channels and 5-8x faster,
+  so EEGNet and the real-time system use it.
 
 ## How to run
 
