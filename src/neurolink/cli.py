@@ -7,12 +7,21 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import typer
 
 from neurolink import __version__
-from neurolink.config import CACHE_DIR, CHANNEL_SETS, CLASS_NAMES, RAW_DIR, PreprocessConfig
+from neurolink.config import (
+    CACHE_DIR,
+    CHANNEL_SETS,
+    CLASS_NAMES,
+    RAW_DIR,
+    RESULTS_DIR,
+    SEED,
+    PreprocessConfig,
+)
 from neurolink.utils.subjects import parse_subjects
 
 app = typer.Typer(
@@ -28,10 +37,14 @@ def _not_implemented(phase: str) -> None:
 
 
 def _setup_logging(verbose: bool) -> None:
+    import mne
+
     logging.basicConfig(
         level=logging.DEBUG if verbose else logging.INFO,
         format="%(levelname)s %(name)s: %(message)s",
     )
+    # MNE's CSP logs every covariance estimate; keep only warnings unless --verbose.
+    mne.set_log_level("INFO" if verbose else "WARNING")
 
 
 def _subjects_option(value: str) -> tuple[int, ...]:
@@ -112,9 +125,53 @@ def preprocess(
 
 
 @app.command(name="train-csp")
-def train_csp() -> None:
-    """Run the CSP + LDA baseline under both evaluation protocols (Phase 2)."""
-    _not_implemented("Phase 2")
+def train_csp(
+    subjects: str = typer.Option("all", help='Subjects: "dev" (1-10), "all", "1-5,8".'),
+    channels: str = typer.Option("all", help=f"Channel set: {sorted(CHANNEL_SETS)}."),
+    car: bool = typer.Option(True, help="Apply common average reference."),
+    protocol: str = typer.Option("both", help="within | cross | both"),
+    n_components: int = typer.Option(6, help="Number of CSP components."),
+    n_splits: int = typer.Option(5, help="Folds per protocol."),
+    seed: int = typer.Option(SEED),
+    cache_dir: Path = typer.Option(CACHE_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """Run the CSP + LDA baseline under the within- and cross-subject protocols."""
+    from neurolink.data.pipeline import build_or_load
+    from neurolink.eval.protocols import cross_subject_cv, within_subject_cv
+    from neurolink.eval.report import save_result
+    from neurolink.models.csp_lda import CSPLDAConfig, make_csp_lda
+    from neurolink.utils.seed import set_seed
+
+    _setup_logging(verbose)
+    if protocol not in {"within", "cross", "both"}:
+        raise typer.BadParameter("protocol must be within, cross or both")
+    set_seed(seed)
+    config = PreprocessConfig(
+        car=car, channels=CHANNEL_SETS[channels], subjects=_subjects_option(subjects)
+    )
+    dataset, _ = build_or_load(config, cache_dir=cache_dir)
+    typer.echo(f"dataset: {dataset.X.shape}, {len(dataset.unique_subjects)} subjects")
+
+    model_cfg = CSPLDAConfig(n_components=n_components)
+    model_name = "csp_lda" if channels == "all" else f"csp_lda_{channels}"
+    extra = {"channels": channels, "car": car, "n_components": n_components, "seed": seed}
+
+    def factory() -> Any:
+        return make_csp_lda(model_cfg)
+
+    protocols = {"within": within_subject_cv, "cross": cross_subject_cv}
+    for name, fn in protocols.items():
+        if protocol not in {name, "both"}:
+            continue
+        result = fn(dataset, factory, model_name, n_splits=n_splits, seed=seed)
+        path = save_result(result, results_dir, extra)
+        acc = result.accuracies
+        typer.echo(
+            f"{name}-subject: accuracy {100 * acc.mean():.1f} +/- {100 * acc.std(ddof=1):.1f} % "
+            f"(pooled {100 * result.pooled_accuracy:.1f} %) -> {path}"
+        )
 
 
 @app.command(name="train-eegnet")

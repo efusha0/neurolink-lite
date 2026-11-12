@@ -20,7 +20,7 @@ def test_version_command() -> None:
 
 
 def test_stub_commands_exit_with_code_2() -> None:
-    for cmd in ["train-csp", "train-eegnet", "stream", "serve", "demo"]:
+    for cmd in ["train-eegnet", "stream", "serve", "demo"]:
         result = runner.invoke(app, [cmd])
         assert result.exit_code == 2, cmd
 
