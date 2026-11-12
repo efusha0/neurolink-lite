@@ -65,7 +65,7 @@ one-command demo (`uv run neurolink demo`).
 ## Progress
 Update this checklist when I approve a phase.
 - [x] Phase 0 — Plan and skeleton
-- [ ] Phase 1 — Data pipeline
+- [x] Phase 1 — Data pipeline
 - [ ] Phase 2 — Baseline (CSP + LDA)
 - [ ] Phase 3 — EEGNet
 - [ ] Phase 4 — Real-time system
