@@ -53,6 +53,19 @@ _To be filled in after Phase 2 and Phase 3._
 # Requires Python 3.11+ and uv (https://docs.astral.sh/uv/)
 uv sync --extra dev
 uv run neurolink --help
+
+# Phase 1: fetch and preprocess the development subset (subjects 1-10, ~75 MB)
+uv run neurolink download --subjects dev
+uv run neurolink preprocess --subjects dev            # 64 channels, CAR on
+uv run neurolink preprocess --subjects dev --channels motor --no-car
+```
+
+`preprocess` writes `data/cache/dataset_<hash>.npz` (keyed by every preprocessing
+parameter) and prints which subjects were skipped and why, for example:
+
+```
+skipped subjects (1):
+  S088: run 4: sampling rate 128 Hz != 160 Hz; run 8: ...; run 12: ...
 ```
 
 Frontend (Vite + TypeScript):

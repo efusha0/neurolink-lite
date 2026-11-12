@@ -17,11 +17,24 @@ RESULTS_DIR = PROJECT_ROOT / "results"
 SFREQ = 160.0
 """Nominal sampling rate of EEGMMIDB. Subjects deviating from this are skipped."""
 
+N_CHANNELS = 64
+"""Number of EEG channels in every EEGMMIDB recording."""
+
+ALL_SUBJECTS: tuple[int, ...] = tuple(range(1, 110))
+DEV_SUBJECTS: tuple[int, ...] = tuple(range(1, 11))
+"""Small subset used during development; the full set is used from Phase 2 on."""
+
 MOTOR_IMAGERY_RUNS: tuple[int, ...] = (4, 8, 12)
 """Runs where the subject imagines opening/closing the left or right fist."""
 
-EVENT_ID: dict[str, int] = {"left": 1, "right": 2}
-"""Class labels. T1 (left fist) -> 1, T2 (right fist) -> 2. T0 (rest) is excluded."""
+RUN_DURATION_S = 120.0
+"""Nominal length of one run. Runs much shorter than this are flagged by the loader."""
+
+EVENT_ID: dict[str, int] = {"T1": 1, "T2": 2}
+"""MNE event codes. T1 = imagine left fist, T2 = imagine right fist. T0 (rest) is excluded."""
+
+CLASS_NAMES: tuple[str, ...] = ("left", "right")
+"""Label ``y`` indexes this tuple: 0 = left (T1), 1 = right (T2)."""
 
 MOTOR_CORTEX_CHANNELS: tuple[str, ...] = (
     "FC5", "FC3", "FC1", "FCz", "FC2", "FC4", "FC6",
@@ -29,6 +42,12 @@ MOTOR_CORTEX_CHANNELS: tuple[str, ...] = (
     "CP5", "CP3", "CP1", "CPz", "CP2", "CP4", "CP6",
 )  # fmt: skip
 """Channel subset over sensorimotor cortex, used by EEGNet and the real-time pipeline."""
+
+CHANNEL_SETS: dict[str, tuple[str, ...] | None] = {
+    "all": None,
+    "motor": MOTOR_CORTEX_CHANNELS,
+}
+"""Named channel subsets selectable from the CLI."""
 
 
 @dataclass(frozen=True)
@@ -40,8 +59,13 @@ class PreprocessConfig:
     tmax: float = 2.5
     car: bool = True
     channels: tuple[str, ...] | None = None  # None -> all 64 channels
-    subjects: tuple[int, ...] = field(default_factory=lambda: tuple(range(1, 110)))
+    subjects: tuple[int, ...] = field(default_factory=lambda: DEV_SUBJECTS)
     runs: tuple[int, ...] = MOTOR_IMAGERY_RUNS
+
+    @property
+    def n_times(self) -> int:
+        """Number of samples per epoch at the nominal sampling rate."""
+        return round((self.tmax - self.tmin) * SFREQ)
 
 
 @dataclass(frozen=True)
