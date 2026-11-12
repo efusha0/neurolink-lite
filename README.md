@@ -38,14 +38,30 @@ sampling rate or recording length are detected, reported and skipped.
 
 ## Results
 
-_To be filled in after Phase 2 and Phase 3._
+Left vs right hand motor imagery, 105 valid subjects (S088, S092, S100 are 128 Hz and S104
+has a truncated run; all four are detected and skipped automatically). 45 epochs per
+subject, 4725 in total, chance = 50 %. Full tables and confusion matrices are in
+[`results/RESULTS.md`](results/RESULTS.md); raw numbers in `results/*.json`.
 
-| Model | Protocol | Accuracy | Notes |
-|-------|----------|----------|-------|
-| CSP + LDA | within-subject 5-fold | TBD | |
-| CSP + LDA | cross-subject leave-subjects-out | TBD | |
-| EEGNet | within-subject 5-fold | TBD | |
-| EEGNet | cross-subject leave-subjects-out | TBD | |
+| Model | Channels | Within-subject 5-fold | Cross-subject 5-fold (subject-grouped) |
+|-------|----------|----------------------:|---------------------------------------:|
+| CSP + LDA | 64 | 59.9 +/- 20.4 % (24/105 subjects >= 70 %) | 62.1 +/- 1.8 % |
+| CSP + LDA | 21 motor | 61.3 +/- 21.7 % (31/105 subjects >= 70 %) | 62.3 +/- 1.3 % |
+| EEGNet | 21 motor | _Phase 3_ | _Phase 3_ |
+
+Within-subject numbers are mean over subject x fold; cross-subject over the 5 folds.
+
+**Reading these numbers honestly.** The baseline is weak, and that is the real picture for
+this dataset rather than a bug:
+
+- *Within-subject* training uses only 36 epochs per fold, far too few to estimate 64 x 64
+  covariance matrices well, so the per-subject accuracy spread is huge (0-100 %). About a
+  quarter of subjects are clearly decodable (>= 70 %), many sit at chance; this matches the
+  well-known "BCI illiteracy" spread reported for EEGMMIDB.
+- *Cross-subject* is slightly *better* than within-subject because it trains on ~3800 epochs,
+  but it plateaus around 62 %: CSP filters do not transfer well across heads.
+- The 21-channel motor subset is as good as or better than all 64 channels, and 5-8x faster,
+  so EEGNet (Phase 3) and the real-time system use it.
 
 ## How to run
 

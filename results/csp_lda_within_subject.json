@@ -1,0 +1,4870 @@
+{
+  "model": "csp_lda",
+  "protocol": "within_subject",
+  "created": "2026-11-12T20:48:11+00:00",
+  "version": "0.1.0",
+  "n_folds": 525,
+  "n_test_epochs": 4725,
+  "n_subjects": 105,
+  "accuracy_mean": 0.5987301587301587,
+  "accuracy_std": 0.20413750079143014,
+  "accuracy_median": 0.5555555555555556,
+  "accuracy_min": 0.0,
+  "accuracy_max": 1.0,
+  "pooled_accuracy": 0.5987301587301588,
+  "balanced_accuracy_mean": 0.5976190476190476,
+  "subjects_above_70": 24,
+  "class_names": [
+    "left",
+    "right"
+  ],
+  "confusion": [
+    [
+      1479,
+      905
+    ],
+    [
+      991,
+      1350
+    ]
+  ],
+  "per_subject_accuracy": {
+    "1": 0.7111111111111111,
+    "2": 0.8666666666666666,
+    "3": 0.4444444444444445,
+    "4": 0.48888888888888893,
+    "5": 0.5333333333333334,
+    "6": 0.5333333333333334,
+    "7": 0.9777777777777779,
+    "8": 0.5999999999999999,
+    "9": 0.4666666666666666,
+    "10": 0.5555555555555556,
+    "11": 0.5777777777777777,
+    "12": 0.4444444444444445,
+    "13": 0.6222222222222222,
+    "14": 0.5333333333333332,
+    "15": 0.6444444444444445,
+    "16": 0.6,
+    "17": 0.4666666666666666,
+    "18": 0.42222222222222217,
+    "19": 0.5777777777777778,
+    "20": 0.5111111111111111,
+    "21": 0.6222222222222221,
+    "22": 0.5777777777777777,
+    "23": 0.6888888888888889,
+    "24": 0.4444444444444445,
+    "25": 0.48888888888888893,
+    "26": 0.8444444444444443,
+    "27": 0.5555555555555556,
+    "28": 0.4666666666666666,
+    "29": 0.9777777777777779,
+    "30": 0.4,
+    "31": 0.7777777777777778,
+    "32": 0.6444444444444444,
+    "33": 0.7777777777777777,
+    "34": 0.8444444444444443,
+    "35": 0.7555555555555555,
+    "36": 0.5333333333333333,
+    "37": 0.4666666666666666,
+    "38": 0.39999999999999997,
+    "39": 0.48888888888888893,
+    "40": 0.4,
+    "41": 0.6222222222222221,
+    "42": 0.888888888888889,
+    "43": 0.7777777777777778,
+    "44": 0.5555555555555556,
+    "45": 0.6,
+    "46": 0.48888888888888893,
+    "47": 0.48888888888888893,
+    "48": 0.6888888888888889,
+    "49": 0.8222222222222222,
+    "50": 0.6,
+    "51": 0.5777777777777777,
+    "52": 0.6888888888888889,
+    "53": 0.8666666666666666,
+    "54": 0.8666666666666666,
+    "55": 0.8222222222222223,
+    "56": 0.888888888888889,
+    "57": 0.3333333333333333,
+    "58": 0.5111111111111112,
+    "59": 0.5333333333333333,
+    "60": 0.7333333333333333,
+    "61": 0.6222222222222223,
+    "62": 0.9333333333333332,
+    "63": 0.4,
+    "64": 0.5999999999999999,
+    "65": 0.5333333333333333,
+    "66": 0.48888888888888893,
+    "67": 0.5555555555555556,
+    "68": 0.5111111111111111,
+    "69": 0.5111111111111111,
+    "70": 0.6888888888888889,
+    "71": 0.7333333333333333,
+    "72": 0.8444444444444443,
+    "73": 0.3555555555555555,
+    "74": 0.4444444444444445,
+    "75": 0.6666666666666666,
+    "76": 0.6666666666666666,
+    "77": 0.3777777777777778,
+    "78": 0.4666666666666666,
+    "79": 0.6,
+    "80": 0.4444444444444445,
+    "81": 0.6444444444444444,
+    "82": 0.5111111111111111,
+    "83": 0.5777777777777778,
+    "84": 0.5555555555555556,
+    "85": 0.7777777777777778,
+    "86": 0.5111111111111111,
+    "87": 0.4444444444444445,
+    "89": 0.6000000000000001,
+    "90": 0.6222222222222221,
+    "91": 0.5333333333333334,
+    "93": 0.8444444444444443,
+    "94": 0.8222222222222222,
+    "95": 0.5111111111111111,
+    "96": 0.5777777777777777,
+    "97": 0.6,
+    "98": 0.6,
+    "99": 0.48888888888888893,
+    "101": 0.4,
+    "102": 0.6444444444444445,
+    "103": 0.5999999999999999,
+    "105": 0.4666666666666667,
+    "106": 0.33333333333333337,
+    "107": 0.3777777777777777,
+    "108": 0.8666666666666666,
+    "109": 0.42222222222222217
+  },
+  "fit_seconds_total": 100.24852740007918,
+  "folds": [
+    {
+      "name": "S001/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        1
+      ]
+    },
+    {
+      "name": "S001/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        1
+      ]
+    },
+    {
+      "name": "S001/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        1
+      ]
+    },
+    {
+      "name": "S001/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        1
+      ]
+    },
+    {
+      "name": "S001/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        1
+      ]
+    },
+    {
+      "name": "S002/fold0",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        2
+      ]
+    },
+    {
+      "name": "S002/fold1",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        2
+      ]
+    },
+    {
+      "name": "S002/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        2
+      ]
+    },
+    {
+      "name": "S002/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        2
+      ]
+    },
+    {
+      "name": "S002/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        2
+      ]
+    },
+    {
+      "name": "S003/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        3
+      ]
+    },
+    {
+      "name": "S003/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        3
+      ]
+    },
+    {
+      "name": "S003/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        3
+      ]
+    },
+    {
+      "name": "S003/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        3
+      ]
+    },
+    {
+      "name": "S003/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        3
+      ]
+    },
+    {
+      "name": "S004/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        4
+      ]
+    },
+    {
+      "name": "S004/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        4
+      ]
+    },
+    {
+      "name": "S004/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        4
+      ]
+    },
+    {
+      "name": "S004/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        4
+      ]
+    },
+    {
+      "name": "S004/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        4
+      ]
+    },
+    {
+      "name": "S005/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        5
+      ]
+    },
+    {
+      "name": "S005/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        5
+      ]
+    },
+    {
+      "name": "S005/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        5
+      ]
+    },
+    {
+      "name": "S005/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        5
+      ]
+    },
+    {
+      "name": "S005/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.6,
+      "n": 9,
+      "test_subjects": [
+        5
+      ]
+    },
+    {
+      "name": "S006/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        6
+      ]
+    },
+    {
+      "name": "S006/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        6
+      ]
+    },
+    {
+      "name": "S006/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        6
+      ]
+    },
+    {
+      "name": "S006/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        6
+      ]
+    },
+    {
+      "name": "S006/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        6
+      ]
+    },
+    {
+      "name": "S007/fold0",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        7
+      ]
+    },
+    {
+      "name": "S007/fold1",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        7
+      ]
+    },
+    {
+      "name": "S007/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        7
+      ]
+    },
+    {
+      "name": "S007/fold3",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        7
+      ]
+    },
+    {
+      "name": "S007/fold4",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        7
+      ]
+    },
+    {
+      "name": "S008/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        8
+      ]
+    },
+    {
+      "name": "S008/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        8
+      ]
+    },
+    {
+      "name": "S008/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        8
+      ]
+    },
+    {
+      "name": "S008/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        8
+      ]
+    },
+    {
+      "name": "S008/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        8
+      ]
+    },
+    {
+      "name": "S009/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        9
+      ]
+    },
+    {
+      "name": "S009/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        9
+      ]
+    },
+    {
+      "name": "S009/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        9
+      ]
+    },
+    {
+      "name": "S009/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        9
+      ]
+    },
+    {
+      "name": "S009/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        9
+      ]
+    },
+    {
+      "name": "S010/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        10
+      ]
+    },
+    {
+      "name": "S010/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        10
+      ]
+    },
+    {
+      "name": "S010/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        10
+      ]
+    },
+    {
+      "name": "S010/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        10
+      ]
+    },
+    {
+      "name": "S010/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        10
+      ]
+    },
+    {
+      "name": "S011/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        11
+      ]
+    },
+    {
+      "name": "S011/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        11
+      ]
+    },
+    {
+      "name": "S011/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        11
+      ]
+    },
+    {
+      "name": "S011/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        11
+      ]
+    },
+    {
+      "name": "S011/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        11
+      ]
+    },
+    {
+      "name": "S012/fold0",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.2,
+      "n": 9,
+      "test_subjects": [
+        12
+      ]
+    },
+    {
+      "name": "S012/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        12
+      ]
+    },
+    {
+      "name": "S012/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        12
+      ]
+    },
+    {
+      "name": "S012/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        12
+      ]
+    },
+    {
+      "name": "S012/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        12
+      ]
+    },
+    {
+      "name": "S013/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        13
+      ]
+    },
+    {
+      "name": "S013/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        13
+      ]
+    },
+    {
+      "name": "S013/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        13
+      ]
+    },
+    {
+      "name": "S013/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        13
+      ]
+    },
+    {
+      "name": "S013/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        13
+      ]
+    },
+    {
+      "name": "S014/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.375,
+      "n": 9,
+      "test_subjects": [
+        14
+      ]
+    },
+    {
+      "name": "S014/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        14
+      ]
+    },
+    {
+      "name": "S014/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        14
+      ]
+    },
+    {
+      "name": "S014/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        14
+      ]
+    },
+    {
+      "name": "S014/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        14
+      ]
+    },
+    {
+      "name": "S015/fold0",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        15
+      ]
+    },
+    {
+      "name": "S015/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        15
+      ]
+    },
+    {
+      "name": "S015/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        15
+      ]
+    },
+    {
+      "name": "S015/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        15
+      ]
+    },
+    {
+      "name": "S015/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        15
+      ]
+    },
+    {
+      "name": "S016/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        16
+      ]
+    },
+    {
+      "name": "S016/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        16
+      ]
+    },
+    {
+      "name": "S016/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        16
+      ]
+    },
+    {
+      "name": "S016/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        16
+      ]
+    },
+    {
+      "name": "S016/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        16
+      ]
+    },
+    {
+      "name": "S017/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        17
+      ]
+    },
+    {
+      "name": "S017/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        17
+      ]
+    },
+    {
+      "name": "S017/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        17
+      ]
+    },
+    {
+      "name": "S017/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        17
+      ]
+    },
+    {
+      "name": "S017/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        17
+      ]
+    },
+    {
+      "name": "S018/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        18
+      ]
+    },
+    {
+      "name": "S018/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        18
+      ]
+    },
+    {
+      "name": "S018/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        18
+      ]
+    },
+    {
+      "name": "S018/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        18
+      ]
+    },
+    {
+      "name": "S018/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        18
+      ]
+    },
+    {
+      "name": "S019/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        19
+      ]
+    },
+    {
+      "name": "S019/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        19
+      ]
+    },
+    {
+      "name": "S019/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        19
+      ]
+    },
+    {
+      "name": "S019/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        19
+      ]
+    },
+    {
+      "name": "S019/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        19
+      ]
+    },
+    {
+      "name": "S020/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        20
+      ]
+    },
+    {
+      "name": "S020/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        20
+      ]
+    },
+    {
+      "name": "S020/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        20
+      ]
+    },
+    {
+      "name": "S020/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        20
+      ]
+    },
+    {
+      "name": "S020/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        20
+      ]
+    },
+    {
+      "name": "S021/fold0",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        21
+      ]
+    },
+    {
+      "name": "S021/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        21
+      ]
+    },
+    {
+      "name": "S021/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        21
+      ]
+    },
+    {
+      "name": "S021/fold3",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        21
+      ]
+    },
+    {
+      "name": "S021/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        21
+      ]
+    },
+    {
+      "name": "S022/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        22
+      ]
+    },
+    {
+      "name": "S022/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        22
+      ]
+    },
+    {
+      "name": "S022/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        22
+      ]
+    },
+    {
+      "name": "S022/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        22
+      ]
+    },
+    {
+      "name": "S022/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        22
+      ]
+    },
+    {
+      "name": "S023/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        23
+      ]
+    },
+    {
+      "name": "S023/fold1",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        23
+      ]
+    },
+    {
+      "name": "S023/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        23
+      ]
+    },
+    {
+      "name": "S023/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        23
+      ]
+    },
+    {
+      "name": "S023/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        23
+      ]
+    },
+    {
+      "name": "S024/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        24
+      ]
+    },
+    {
+      "name": "S024/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        24
+      ]
+    },
+    {
+      "name": "S024/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        24
+      ]
+    },
+    {
+      "name": "S024/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        24
+      ]
+    },
+    {
+      "name": "S024/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        24
+      ]
+    },
+    {
+      "name": "S025/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        25
+      ]
+    },
+    {
+      "name": "S025/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.6,
+      "n": 9,
+      "test_subjects": [
+        25
+      ]
+    },
+    {
+      "name": "S025/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        25
+      ]
+    },
+    {
+      "name": "S025/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        25
+      ]
+    },
+    {
+      "name": "S025/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        25
+      ]
+    },
+    {
+      "name": "S026/fold0",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        26
+      ]
+    },
+    {
+      "name": "S026/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        26
+      ]
+    },
+    {
+      "name": "S026/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        26
+      ]
+    },
+    {
+      "name": "S026/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        26
+      ]
+    },
+    {
+      "name": "S026/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        26
+      ]
+    },
+    {
+      "name": "S027/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        27
+      ]
+    },
+    {
+      "name": "S027/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        27
+      ]
+    },
+    {
+      "name": "S027/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        27
+      ]
+    },
+    {
+      "name": "S027/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        27
+      ]
+    },
+    {
+      "name": "S027/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        27
+      ]
+    },
+    {
+      "name": "S028/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        28
+      ]
+    },
+    {
+      "name": "S028/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        28
+      ]
+    },
+    {
+      "name": "S028/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        28
+      ]
+    },
+    {
+      "name": "S028/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        28
+      ]
+    },
+    {
+      "name": "S028/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        28
+      ]
+    },
+    {
+      "name": "S029/fold0",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        29
+      ]
+    },
+    {
+      "name": "S029/fold1",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        29
+      ]
+    },
+    {
+      "name": "S029/fold2",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        29
+      ]
+    },
+    {
+      "name": "S029/fold3",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        29
+      ]
+    },
+    {
+      "name": "S029/fold4",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        29
+      ]
+    },
+    {
+      "name": "S030/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        30
+      ]
+    },
+    {
+      "name": "S030/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        30
+      ]
+    },
+    {
+      "name": "S030/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        30
+      ]
+    },
+    {
+      "name": "S030/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        30
+      ]
+    },
+    {
+      "name": "S030/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        30
+      ]
+    },
+    {
+      "name": "S031/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        31
+      ]
+    },
+    {
+      "name": "S031/fold1",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        31
+      ]
+    },
+    {
+      "name": "S031/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        31
+      ]
+    },
+    {
+      "name": "S031/fold3",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        31
+      ]
+    },
+    {
+      "name": "S031/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        31
+      ]
+    },
+    {
+      "name": "S032/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        32
+      ]
+    },
+    {
+      "name": "S032/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        32
+      ]
+    },
+    {
+      "name": "S032/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        32
+      ]
+    },
+    {
+      "name": "S032/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        32
+      ]
+    },
+    {
+      "name": "S032/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        32
+      ]
+    },
+    {
+      "name": "S033/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        33
+      ]
+    },
+    {
+      "name": "S033/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        33
+      ]
+    },
+    {
+      "name": "S033/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        33
+      ]
+    },
+    {
+      "name": "S033/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        33
+      ]
+    },
+    {
+      "name": "S033/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        33
+      ]
+    },
+    {
+      "name": "S034/fold0",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        34
+      ]
+    },
+    {
+      "name": "S034/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        34
+      ]
+    },
+    {
+      "name": "S034/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        34
+      ]
+    },
+    {
+      "name": "S034/fold3",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        34
+      ]
+    },
+    {
+      "name": "S034/fold4",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        34
+      ]
+    },
+    {
+      "name": "S035/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        35
+      ]
+    },
+    {
+      "name": "S035/fold1",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        35
+      ]
+    },
+    {
+      "name": "S035/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        35
+      ]
+    },
+    {
+      "name": "S035/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        35
+      ]
+    },
+    {
+      "name": "S035/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        35
+      ]
+    },
+    {
+      "name": "S036/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        36
+      ]
+    },
+    {
+      "name": "S036/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        36
+      ]
+    },
+    {
+      "name": "S036/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        36
+      ]
+    },
+    {
+      "name": "S036/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        36
+      ]
+    },
+    {
+      "name": "S036/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        36
+      ]
+    },
+    {
+      "name": "S037/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        37
+      ]
+    },
+    {
+      "name": "S037/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        37
+      ]
+    },
+    {
+      "name": "S037/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        37
+      ]
+    },
+    {
+      "name": "S037/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        37
+      ]
+    },
+    {
+      "name": "S037/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        37
+      ]
+    },
+    {
+      "name": "S038/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        38
+      ]
+    },
+    {
+      "name": "S038/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        38
+      ]
+    },
+    {
+      "name": "S038/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        38
+      ]
+    },
+    {
+      "name": "S038/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        38
+      ]
+    },
+    {
+      "name": "S038/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        38
+      ]
+    },
+    {
+      "name": "S039/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        39
+      ]
+    },
+    {
+      "name": "S039/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.5,
+      "n": 9,
+      "test_subjects": [
+        39
+      ]
+    },
+    {
+      "name": "S039/fold2",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        39
+      ]
+    },
+    {
+      "name": "S039/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        39
+      ]
+    },
+    {
+      "name": "S039/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        39
+      ]
+    },
+    {
+      "name": "S040/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.5,
+      "n": 9,
+      "test_subjects": [
+        40
+      ]
+    },
+    {
+      "name": "S040/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        40
+      ]
+    },
+    {
+      "name": "S040/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        40
+      ]
+    },
+    {
+      "name": "S040/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        40
+      ]
+    },
+    {
+      "name": "S040/fold4",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        40
+      ]
+    },
+    {
+      "name": "S041/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        41
+      ]
+    },
+    {
+      "name": "S041/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        41
+      ]
+    },
+    {
+      "name": "S041/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        41
+      ]
+    },
+    {
+      "name": "S041/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        41
+      ]
+    },
+    {
+      "name": "S041/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        41
+      ]
+    },
+    {
+      "name": "S042/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        42
+      ]
+    },
+    {
+      "name": "S042/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        42
+      ]
+    },
+    {
+      "name": "S042/fold2",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        42
+      ]
+    },
+    {
+      "name": "S042/fold3",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        42
+      ]
+    },
+    {
+      "name": "S042/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        42
+      ]
+    },
+    {
+      "name": "S043/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        43
+      ]
+    },
+    {
+      "name": "S043/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        43
+      ]
+    },
+    {
+      "name": "S043/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        43
+      ]
+    },
+    {
+      "name": "S043/fold3",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        43
+      ]
+    },
+    {
+      "name": "S043/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        43
+      ]
+    },
+    {
+      "name": "S044/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        44
+      ]
+    },
+    {
+      "name": "S044/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        44
+      ]
+    },
+    {
+      "name": "S044/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        44
+      ]
+    },
+    {
+      "name": "S044/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        44
+      ]
+    },
+    {
+      "name": "S044/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        44
+      ]
+    },
+    {
+      "name": "S045/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        45
+      ]
+    },
+    {
+      "name": "S045/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        45
+      ]
+    },
+    {
+      "name": "S045/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        45
+      ]
+    },
+    {
+      "name": "S045/fold3",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.2,
+      "n": 9,
+      "test_subjects": [
+        45
+      ]
+    },
+    {
+      "name": "S045/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        45
+      ]
+    },
+    {
+      "name": "S046/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        46
+      ]
+    },
+    {
+      "name": "S046/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        46
+      ]
+    },
+    {
+      "name": "S046/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        46
+      ]
+    },
+    {
+      "name": "S046/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        46
+      ]
+    },
+    {
+      "name": "S046/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        46
+      ]
+    },
+    {
+      "name": "S047/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        47
+      ]
+    },
+    {
+      "name": "S047/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        47
+      ]
+    },
+    {
+      "name": "S047/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        47
+      ]
+    },
+    {
+      "name": "S047/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        47
+      ]
+    },
+    {
+      "name": "S047/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.6,
+      "n": 9,
+      "test_subjects": [
+        47
+      ]
+    },
+    {
+      "name": "S048/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        48
+      ]
+    },
+    {
+      "name": "S048/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        48
+      ]
+    },
+    {
+      "name": "S048/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        48
+      ]
+    },
+    {
+      "name": "S048/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        48
+      ]
+    },
+    {
+      "name": "S048/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        48
+      ]
+    },
+    {
+      "name": "S049/fold0",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        49
+      ]
+    },
+    {
+      "name": "S049/fold1",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        49
+      ]
+    },
+    {
+      "name": "S049/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        49
+      ]
+    },
+    {
+      "name": "S049/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        49
+      ]
+    },
+    {
+      "name": "S049/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        49
+      ]
+    },
+    {
+      "name": "S050/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        50
+      ]
+    },
+    {
+      "name": "S050/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        50
+      ]
+    },
+    {
+      "name": "S050/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        50
+      ]
+    },
+    {
+      "name": "S050/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        50
+      ]
+    },
+    {
+      "name": "S050/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        50
+      ]
+    },
+    {
+      "name": "S051/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        51
+      ]
+    },
+    {
+      "name": "S051/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        51
+      ]
+    },
+    {
+      "name": "S051/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        51
+      ]
+    },
+    {
+      "name": "S051/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        51
+      ]
+    },
+    {
+      "name": "S051/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        51
+      ]
+    },
+    {
+      "name": "S052/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        52
+      ]
+    },
+    {
+      "name": "S052/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        52
+      ]
+    },
+    {
+      "name": "S052/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        52
+      ]
+    },
+    {
+      "name": "S052/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        52
+      ]
+    },
+    {
+      "name": "S052/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        52
+      ]
+    },
+    {
+      "name": "S053/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        53
+      ]
+    },
+    {
+      "name": "S053/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        53
+      ]
+    },
+    {
+      "name": "S053/fold2",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        53
+      ]
+    },
+    {
+      "name": "S053/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        53
+      ]
+    },
+    {
+      "name": "S053/fold4",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        53
+      ]
+    },
+    {
+      "name": "S054/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        54
+      ]
+    },
+    {
+      "name": "S054/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        54
+      ]
+    },
+    {
+      "name": "S054/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        54
+      ]
+    },
+    {
+      "name": "S054/fold3",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        54
+      ]
+    },
+    {
+      "name": "S054/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        54
+      ]
+    },
+    {
+      "name": "S055/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        55
+      ]
+    },
+    {
+      "name": "S055/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        55
+      ]
+    },
+    {
+      "name": "S055/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        55
+      ]
+    },
+    {
+      "name": "S055/fold3",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        55
+      ]
+    },
+    {
+      "name": "S055/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        55
+      ]
+    },
+    {
+      "name": "S056/fold0",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        56
+      ]
+    },
+    {
+      "name": "S056/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        56
+      ]
+    },
+    {
+      "name": "S056/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        56
+      ]
+    },
+    {
+      "name": "S056/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        56
+      ]
+    },
+    {
+      "name": "S056/fold4",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        56
+      ]
+    },
+    {
+      "name": "S057/fold0",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        57
+      ]
+    },
+    {
+      "name": "S057/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        57
+      ]
+    },
+    {
+      "name": "S057/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        57
+      ]
+    },
+    {
+      "name": "S057/fold3",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        57
+      ]
+    },
+    {
+      "name": "S057/fold4",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        57
+      ]
+    },
+    {
+      "name": "S058/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        58
+      ]
+    },
+    {
+      "name": "S058/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        58
+      ]
+    },
+    {
+      "name": "S058/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        58
+      ]
+    },
+    {
+      "name": "S058/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        58
+      ]
+    },
+    {
+      "name": "S058/fold4",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.2,
+      "n": 9,
+      "test_subjects": [
+        58
+      ]
+    },
+    {
+      "name": "S059/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        59
+      ]
+    },
+    {
+      "name": "S059/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        59
+      ]
+    },
+    {
+      "name": "S059/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        59
+      ]
+    },
+    {
+      "name": "S059/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        59
+      ]
+    },
+    {
+      "name": "S059/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        59
+      ]
+    },
+    {
+      "name": "S060/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        60
+      ]
+    },
+    {
+      "name": "S060/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        60
+      ]
+    },
+    {
+      "name": "S060/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        60
+      ]
+    },
+    {
+      "name": "S060/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        60
+      ]
+    },
+    {
+      "name": "S060/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        60
+      ]
+    },
+    {
+      "name": "S061/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        61
+      ]
+    },
+    {
+      "name": "S061/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        61
+      ]
+    },
+    {
+      "name": "S061/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        61
+      ]
+    },
+    {
+      "name": "S061/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        61
+      ]
+    },
+    {
+      "name": "S061/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        61
+      ]
+    },
+    {
+      "name": "S062/fold0",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        62
+      ]
+    },
+    {
+      "name": "S062/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        62
+      ]
+    },
+    {
+      "name": "S062/fold2",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        62
+      ]
+    },
+    {
+      "name": "S062/fold3",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        62
+      ]
+    },
+    {
+      "name": "S062/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        62
+      ]
+    },
+    {
+      "name": "S063/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        63
+      ]
+    },
+    {
+      "name": "S063/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        63
+      ]
+    },
+    {
+      "name": "S063/fold2",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.25,
+      "n": 9,
+      "test_subjects": [
+        63
+      ]
+    },
+    {
+      "name": "S063/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        63
+      ]
+    },
+    {
+      "name": "S063/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        63
+      ]
+    },
+    {
+      "name": "S064/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        64
+      ]
+    },
+    {
+      "name": "S064/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        64
+      ]
+    },
+    {
+      "name": "S064/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        64
+      ]
+    },
+    {
+      "name": "S064/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        64
+      ]
+    },
+    {
+      "name": "S064/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        64
+      ]
+    },
+    {
+      "name": "S065/fold0",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        65
+      ]
+    },
+    {
+      "name": "S065/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        65
+      ]
+    },
+    {
+      "name": "S065/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        65
+      ]
+    },
+    {
+      "name": "S065/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        65
+      ]
+    },
+    {
+      "name": "S065/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        65
+      ]
+    },
+    {
+      "name": "S066/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        66
+      ]
+    },
+    {
+      "name": "S066/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.375,
+      "n": 9,
+      "test_subjects": [
+        66
+      ]
+    },
+    {
+      "name": "S066/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        66
+      ]
+    },
+    {
+      "name": "S066/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        66
+      ]
+    },
+    {
+      "name": "S066/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        66
+      ]
+    },
+    {
+      "name": "S067/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        67
+      ]
+    },
+    {
+      "name": "S067/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        67
+      ]
+    },
+    {
+      "name": "S067/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        67
+      ]
+    },
+    {
+      "name": "S067/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        67
+      ]
+    },
+    {
+      "name": "S067/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        67
+      ]
+    },
+    {
+      "name": "S068/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        68
+      ]
+    },
+    {
+      "name": "S068/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        68
+      ]
+    },
+    {
+      "name": "S068/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        68
+      ]
+    },
+    {
+      "name": "S068/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        68
+      ]
+    },
+    {
+      "name": "S068/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        68
+      ]
+    },
+    {
+      "name": "S069/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        69
+      ]
+    },
+    {
+      "name": "S069/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        69
+      ]
+    },
+    {
+      "name": "S069/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        69
+      ]
+    },
+    {
+      "name": "S069/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        69
+      ]
+    },
+    {
+      "name": "S069/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.6,
+      "n": 9,
+      "test_subjects": [
+        69
+      ]
+    },
+    {
+      "name": "S070/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        70
+      ]
+    },
+    {
+      "name": "S070/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        70
+      ]
+    },
+    {
+      "name": "S070/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        70
+      ]
+    },
+    {
+      "name": "S070/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        70
+      ]
+    },
+    {
+      "name": "S070/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        70
+      ]
+    },
+    {
+      "name": "S071/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        71
+      ]
+    },
+    {
+      "name": "S071/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        71
+      ]
+    },
+    {
+      "name": "S071/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        71
+      ]
+    },
+    {
+      "name": "S071/fold3",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        71
+      ]
+    },
+    {
+      "name": "S071/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        71
+      ]
+    },
+    {
+      "name": "S072/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        72
+      ]
+    },
+    {
+      "name": "S072/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        72
+      ]
+    },
+    {
+      "name": "S072/fold2",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        72
+      ]
+    },
+    {
+      "name": "S072/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        72
+      ]
+    },
+    {
+      "name": "S072/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        72
+      ]
+    },
+    {
+      "name": "S073/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        73
+      ]
+    },
+    {
+      "name": "S073/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        73
+      ]
+    },
+    {
+      "name": "S073/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        73
+      ]
+    },
+    {
+      "name": "S073/fold3",
+      "accuracy": 0.0,
+      "balanced_accuracy": 0.0,
+      "n": 9,
+      "test_subjects": [
+        73
+      ]
+    },
+    {
+      "name": "S073/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        73
+      ]
+    },
+    {
+      "name": "S074/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        74
+      ]
+    },
+    {
+      "name": "S074/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        74
+      ]
+    },
+    {
+      "name": "S074/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.5,
+      "n": 9,
+      "test_subjects": [
+        74
+      ]
+    },
+    {
+      "name": "S074/fold3",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.2,
+      "n": 9,
+      "test_subjects": [
+        74
+      ]
+    },
+    {
+      "name": "S074/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        74
+      ]
+    },
+    {
+      "name": "S075/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        75
+      ]
+    },
+    {
+      "name": "S075/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        75
+      ]
+    },
+    {
+      "name": "S075/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        75
+      ]
+    },
+    {
+      "name": "S075/fold3",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        75
+      ]
+    },
+    {
+      "name": "S075/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        75
+      ]
+    },
+    {
+      "name": "S076/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        76
+      ]
+    },
+    {
+      "name": "S076/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        76
+      ]
+    },
+    {
+      "name": "S076/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        76
+      ]
+    },
+    {
+      "name": "S076/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        76
+      ]
+    },
+    {
+      "name": "S076/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        76
+      ]
+    },
+    {
+      "name": "S077/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        77
+      ]
+    },
+    {
+      "name": "S077/fold1",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.2,
+      "n": 9,
+      "test_subjects": [
+        77
+      ]
+    },
+    {
+      "name": "S077/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        77
+      ]
+    },
+    {
+      "name": "S077/fold3",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.2,
+      "n": 9,
+      "test_subjects": [
+        77
+      ]
+    },
+    {
+      "name": "S077/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        77
+      ]
+    },
+    {
+      "name": "S078/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        78
+      ]
+    },
+    {
+      "name": "S078/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        78
+      ]
+    },
+    {
+      "name": "S078/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        78
+      ]
+    },
+    {
+      "name": "S078/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.6,
+      "n": 9,
+      "test_subjects": [
+        78
+      ]
+    },
+    {
+      "name": "S078/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.6,
+      "n": 9,
+      "test_subjects": [
+        78
+      ]
+    },
+    {
+      "name": "S079/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        79
+      ]
+    },
+    {
+      "name": "S079/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        79
+      ]
+    },
+    {
+      "name": "S079/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        79
+      ]
+    },
+    {
+      "name": "S079/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        79
+      ]
+    },
+    {
+      "name": "S079/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        79
+      ]
+    },
+    {
+      "name": "S080/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.375,
+      "n": 9,
+      "test_subjects": [
+        80
+      ]
+    },
+    {
+      "name": "S080/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        80
+      ]
+    },
+    {
+      "name": "S080/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        80
+      ]
+    },
+    {
+      "name": "S080/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        80
+      ]
+    },
+    {
+      "name": "S080/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        80
+      ]
+    },
+    {
+      "name": "S081/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        81
+      ]
+    },
+    {
+      "name": "S081/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        81
+      ]
+    },
+    {
+      "name": "S081/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        81
+      ]
+    },
+    {
+      "name": "S081/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        81
+      ]
+    },
+    {
+      "name": "S081/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        81
+      ]
+    },
+    {
+      "name": "S082/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        82
+      ]
+    },
+    {
+      "name": "S082/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        82
+      ]
+    },
+    {
+      "name": "S082/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        82
+      ]
+    },
+    {
+      "name": "S082/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.375,
+      "n": 9,
+      "test_subjects": [
+        82
+      ]
+    },
+    {
+      "name": "S082/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        82
+      ]
+    },
+    {
+      "name": "S083/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        83
+      ]
+    },
+    {
+      "name": "S083/fold1",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        83
+      ]
+    },
+    {
+      "name": "S083/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        83
+      ]
+    },
+    {
+      "name": "S083/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        83
+      ]
+    },
+    {
+      "name": "S083/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        83
+      ]
+    },
+    {
+      "name": "S084/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.375,
+      "n": 9,
+      "test_subjects": [
+        84
+      ]
+    },
+    {
+      "name": "S084/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        84
+      ]
+    },
+    {
+      "name": "S084/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        84
+      ]
+    },
+    {
+      "name": "S084/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.375,
+      "n": 9,
+      "test_subjects": [
+        84
+      ]
+    },
+    {
+      "name": "S084/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        84
+      ]
+    },
+    {
+      "name": "S085/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        85
+      ]
+    },
+    {
+      "name": "S085/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        85
+      ]
+    },
+    {
+      "name": "S085/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.875,
+      "n": 9,
+      "test_subjects": [
+        85
+      ]
+    },
+    {
+      "name": "S085/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        85
+      ]
+    },
+    {
+      "name": "S085/fold4",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        85
+      ]
+    },
+    {
+      "name": "S086/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        86
+      ]
+    },
+    {
+      "name": "S086/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        86
+      ]
+    },
+    {
+      "name": "S086/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        86
+      ]
+    },
+    {
+      "name": "S086/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        86
+      ]
+    },
+    {
+      "name": "S086/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        86
+      ]
+    },
+    {
+      "name": "S087/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        87
+      ]
+    },
+    {
+      "name": "S087/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        87
+      ]
+    },
+    {
+      "name": "S087/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        87
+      ]
+    },
+    {
+      "name": "S087/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        87
+      ]
+    },
+    {
+      "name": "S087/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        87
+      ]
+    },
+    {
+      "name": "S089/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        89
+      ]
+    },
+    {
+      "name": "S089/fold1",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        89
+      ]
+    },
+    {
+      "name": "S089/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        89
+      ]
+    },
+    {
+      "name": "S089/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        89
+      ]
+    },
+    {
+      "name": "S089/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        89
+      ]
+    },
+    {
+      "name": "S090/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        90
+      ]
+    },
+    {
+      "name": "S090/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        90
+      ]
+    },
+    {
+      "name": "S090/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        90
+      ]
+    },
+    {
+      "name": "S090/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        90
+      ]
+    },
+    {
+      "name": "S090/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        90
+      ]
+    },
+    {
+      "name": "S091/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        91
+      ]
+    },
+    {
+      "name": "S091/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        91
+      ]
+    },
+    {
+      "name": "S091/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        91
+      ]
+    },
+    {
+      "name": "S091/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        91
+      ]
+    },
+    {
+      "name": "S091/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        91
+      ]
+    },
+    {
+      "name": "S093/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        93
+      ]
+    },
+    {
+      "name": "S093/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        93
+      ]
+    },
+    {
+      "name": "S093/fold2",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        93
+      ]
+    },
+    {
+      "name": "S093/fold3",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        93
+      ]
+    },
+    {
+      "name": "S093/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        93
+      ]
+    },
+    {
+      "name": "S094/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        94
+      ]
+    },
+    {
+      "name": "S094/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        94
+      ]
+    },
+    {
+      "name": "S094/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        94
+      ]
+    },
+    {
+      "name": "S094/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        94
+      ]
+    },
+    {
+      "name": "S094/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        94
+      ]
+    },
+    {
+      "name": "S095/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.5,
+      "n": 9,
+      "test_subjects": [
+        95
+      ]
+    },
+    {
+      "name": "S095/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        95
+      ]
+    },
+    {
+      "name": "S095/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        95
+      ]
+    },
+    {
+      "name": "S095/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        95
+      ]
+    },
+    {
+      "name": "S095/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        95
+      ]
+    },
+    {
+      "name": "S096/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        96
+      ]
+    },
+    {
+      "name": "S096/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        96
+      ]
+    },
+    {
+      "name": "S096/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.7,
+      "n": 9,
+      "test_subjects": [
+        96
+      ]
+    },
+    {
+      "name": "S096/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        96
+      ]
+    },
+    {
+      "name": "S096/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        96
+      ]
+    },
+    {
+      "name": "S097/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        97
+      ]
+    },
+    {
+      "name": "S097/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        97
+      ]
+    },
+    {
+      "name": "S097/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        97
+      ]
+    },
+    {
+      "name": "S097/fold3",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        97
+      ]
+    },
+    {
+      "name": "S097/fold4",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        97
+      ]
+    },
+    {
+      "name": "S098/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        98
+      ]
+    },
+    {
+      "name": "S098/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        98
+      ]
+    },
+    {
+      "name": "S098/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        98
+      ]
+    },
+    {
+      "name": "S098/fold3",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        98
+      ]
+    },
+    {
+      "name": "S098/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        98
+      ]
+    },
+    {
+      "name": "S099/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        99
+      ]
+    },
+    {
+      "name": "S099/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        99
+      ]
+    },
+    {
+      "name": "S099/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        99
+      ]
+    },
+    {
+      "name": "S099/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.65,
+      "n": 9,
+      "test_subjects": [
+        99
+      ]
+    },
+    {
+      "name": "S099/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.3,
+      "n": 9,
+      "test_subjects": [
+        99
+      ]
+    },
+    {
+      "name": "S101/fold0",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        101
+      ]
+    },
+    {
+      "name": "S101/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        101
+      ]
+    },
+    {
+      "name": "S101/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        101
+      ]
+    },
+    {
+      "name": "S101/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        101
+      ]
+    },
+    {
+      "name": "S101/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        101
+      ]
+    },
+    {
+      "name": "S102/fold0",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.75,
+      "n": 9,
+      "test_subjects": [
+        102
+      ]
+    },
+    {
+      "name": "S102/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        102
+      ]
+    },
+    {
+      "name": "S102/fold2",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        102
+      ]
+    },
+    {
+      "name": "S102/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        102
+      ]
+    },
+    {
+      "name": "S102/fold4",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        102
+      ]
+    },
+    {
+      "name": "S103/fold0",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.525,
+      "n": 9,
+      "test_subjects": [
+        103
+      ]
+    },
+    {
+      "name": "S103/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        103
+      ]
+    },
+    {
+      "name": "S103/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        103
+      ]
+    },
+    {
+      "name": "S103/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        103
+      ]
+    },
+    {
+      "name": "S103/fold4",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        103
+      ]
+    },
+    {
+      "name": "S105/fold0",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.675,
+      "n": 9,
+      "test_subjects": [
+        105
+      ]
+    },
+    {
+      "name": "S105/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        105
+      ]
+    },
+    {
+      "name": "S105/fold2",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.575,
+      "n": 9,
+      "test_subjects": [
+        105
+      ]
+    },
+    {
+      "name": "S105/fold3",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        105
+      ]
+    },
+    {
+      "name": "S105/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        105
+      ]
+    },
+    {
+      "name": "S106/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        106
+      ]
+    },
+    {
+      "name": "S106/fold1",
+      "accuracy": 0.5555555555555556,
+      "balanced_accuracy": 0.55,
+      "n": 9,
+      "test_subjects": [
+        106
+      ]
+    },
+    {
+      "name": "S106/fold2",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.2,
+      "n": 9,
+      "test_subjects": [
+        106
+      ]
+    },
+    {
+      "name": "S106/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        106
+      ]
+    },
+    {
+      "name": "S106/fold4",
+      "accuracy": 0.1111111111111111,
+      "balanced_accuracy": 0.1,
+      "n": 9,
+      "test_subjects": [
+        106
+      ]
+    },
+    {
+      "name": "S107/fold0",
+      "accuracy": 0.2222222222222222,
+      "balanced_accuracy": 0.225,
+      "n": 9,
+      "test_subjects": [
+        107
+      ]
+    },
+    {
+      "name": "S107/fold1",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        107
+      ]
+    },
+    {
+      "name": "S107/fold2",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        107
+      ]
+    },
+    {
+      "name": "S107/fold3",
+      "accuracy": 0.6666666666666666,
+      "balanced_accuracy": 0.625,
+      "n": 9,
+      "test_subjects": [
+        107
+      ]
+    },
+    {
+      "name": "S107/fold4",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.325,
+      "n": 9,
+      "test_subjects": [
+        107
+      ]
+    },
+    {
+      "name": "S108/fold0",
+      "accuracy": 1.0,
+      "balanced_accuracy": 1.0,
+      "n": 9,
+      "test_subjects": [
+        108
+      ]
+    },
+    {
+      "name": "S108/fold1",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        108
+      ]
+    },
+    {
+      "name": "S108/fold2",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.775,
+      "n": 9,
+      "test_subjects": [
+        108
+      ]
+    },
+    {
+      "name": "S108/fold3",
+      "accuracy": 0.7777777777777778,
+      "balanced_accuracy": 0.8,
+      "n": 9,
+      "test_subjects": [
+        108
+      ]
+    },
+    {
+      "name": "S108/fold4",
+      "accuracy": 0.8888888888888888,
+      "balanced_accuracy": 0.9,
+      "n": 9,
+      "test_subjects": [
+        108
+      ]
+    },
+    {
+      "name": "S109/fold0",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.425,
+      "n": 9,
+      "test_subjects": [
+        109
+      ]
+    },
+    {
+      "name": "S109/fold1",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.475,
+      "n": 9,
+      "test_subjects": [
+        109
+      ]
+    },
+    {
+      "name": "S109/fold2",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.4,
+      "n": 9,
+      "test_subjects": [
+        109
+      ]
+    },
+    {
+      "name": "S109/fold3",
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.35,
+      "n": 9,
+      "test_subjects": [
+        109
+      ]
+    },
+    {
+      "name": "S109/fold4",
+      "accuracy": 0.4444444444444444,
+      "balanced_accuracy": 0.45,
+      "n": 9,
+      "test_subjects": [
+        109
+      ]
+    }
+  ],
+  "channels": "all",
+  "car": true,
+  "n_components": 6,
+  "seed": 42
+}
