@@ -44,3 +44,14 @@ def test_save_and_markdown(synthetic_dataset: Dataset, tmp_path: Path) -> None:
     save_result(ws, tmp_path)
     assert len(load_results(tmp_path)) == 2
     assert write_markdown_table(tmp_path).exists()
+
+
+def test_markdown_tolerates_results_from_before_subject_stats(
+    synthetic_dataset: Dataset, tmp_path: Path
+) -> None:
+    ws = within_subject_cv(synthetic_dataset, make_csp_lda, "csp_lda", seed=0)
+    old = {k: v for k, v in result_to_dict(ws).items() if not k.startswith("subject_accuracy")}
+    (tmp_path / "old_within_subject.json").write_text(json.dumps(old), encoding="utf-8")
+    save_result(ws, tmp_path)  # must not crash on the legacy file
+    md = (tmp_path / "RESULTS.md").read_text(encoding="utf-8")
+    assert "re-run needed" in md

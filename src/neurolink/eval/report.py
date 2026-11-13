@@ -99,10 +99,20 @@ def write_markdown_table(results_dir: Path = RESULTS_DIR) -> Path:
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in rows:
-        lines.append(
+        head = (
             f"| {r['model']} | {r['protocol'].replace('_', '-')} | {r['n_subjects']} | "
             f"{r['n_test_epochs']} | "
-            f"{100 * r['subject_accuracy_mean']:.1f} +/- {100 * r['subject_accuracy_std']:.1f} | "
+        )
+        if "subject_accuracy_mean" not in r:
+            # Written before per-subject statistics existed; its per-subject numbers are
+            # unreliable, so show nothing rather than something wrong.
+            lines.append(
+                head + f"re-run needed | - | - | {100 * r['pooled_accuracy']:.1f} | - | - |"
+            )
+            continue
+        lines.append(
+            head
+            + f"{100 * r['subject_accuracy_mean']:.1f} +/- {100 * r['subject_accuracy_std']:.1f} | "
             f"{100 * r['subject_accuracy_median']:.1f} | "
             f"{100 * r['subject_accuracy_min']:.0f}-{100 * r['subject_accuracy_max']:.0f} | "
             f"{100 * r['pooled_accuracy']:.1f} | {r['subjects_above_70']}/{r['n_subjects']} | "
