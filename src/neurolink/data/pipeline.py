@@ -15,7 +15,7 @@ from neurolink.data.cache import Dataset, cache_path, load_dataset, save_dataset
 from neurolink.data.download import download_subject
 from neurolink.data.epochs import make_epochs
 from neurolink.data.loader import ValidationReport, load_subject
-from neurolink.data.preprocess import apply_car, bandpass, pick_channels
+from neurolink.data.preprocess import apply_car, bandpass, causal_bandpass, pick_channels
 
 log = logging.getLogger(__name__)
 
@@ -52,7 +52,10 @@ def default_subject_loader(config: PreprocessConfig, raw_dir: Path = RAW_DIR) ->
 
 def preprocess_raw(raw: mne.io.BaseRaw, config: PreprocessConfig) -> mne.io.BaseRaw:
     """Band-pass, optional CAR, then channel subset (CAR uses all 64 channels)."""
-    bandpass(raw, config.band)
+    if config.causal:
+        causal_bandpass(raw, config.band)
+    else:
+        bandpass(raw, config.band)
     if config.car:
         apply_car(raw)
     pick_channels(raw, config.channels)

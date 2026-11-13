@@ -131,6 +131,83 @@ def write_markdown_table(results_dir: Path = RESULTS_DIR) -> Path:
             f"| {names[1]} | {cm[1][0]} | {cm[1][1]} |",
             "",
         ]
+    lines += pseudo_online_markdown(results_dir)
     path = results_dir / RESULTS_MD
     path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return path
+
+
+PSEUDO_ONLINE_DIR = "pseudo_online"
+PSEUDO_ONLINE_JSON = "pseudo_online.json"
+
+
+def _nan_to_none(obj: Any) -> Any:
+    """JSON has no NaN; metrics without data (e.g. no active window) become ``null``."""
+    if isinstance(obj, dict):
+        return {k: _nan_to_none(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_nan_to_none(v) for v in obj]
+    if isinstance(obj, float) and np.isnan(obj):
+        return None
+    return obj
+
+
+def save_pseudo_online(summary: dict[str, Any], results_dir: Path = RESULTS_DIR) -> Path:
+    """Write ``results/pseudo_online/pseudo_online.json`` and refresh ``RESULTS.md``."""
+    path = results_dir / PSEUDO_ONLINE_DIR / PSEUDO_ONLINE_JSON
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "created": datetime.now(UTC).isoformat(timespec="seconds"),
+        "version": __version__,
+        **_nan_to_none(summary),
+    }
+    path.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8", newline="\n")
+    write_markdown_table(results_dir)
+    return path
+
+
+def _pct(cell: dict[str, Any]) -> str:
+    if cell["mean"] is None:
+        return "-"
+    return f"{100 * cell['mean']:.1f} +/- {100 * cell['std']:.1f}"
+
+
+def pseudo_online_markdown(results_dir: Path = RESULTS_DIR) -> list[str]:
+    """Markdown section for the pseudo-online results; empty if they do not exist."""
+    path = results_dir / PSEUDO_ONLINE_DIR / PSEUDO_ONLINE_JSON
+    if not path.exists():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    cfg = data["config"]
+    lines = [
+        "## Pseudo-online accuracy",
+        "",
+        "The online pipeline run over held-out recordings: causal band-pass,"
+        f" {cfg['window_s']:g} s windows every {cfg['step_s']:g} s that ignore the cue timing,",
+        f"EMA smoothing (alpha = {cfg['smoothing_alpha']:g}). Mean +/- std across subjects, in %.",
+        "",
+        "* Candidate = scope / model / filter used for the *training* epochs. `cross`: model",
+        "  of the fold that held the subject out, all three runs. `subject`: trained on runs",
+        f"  4 and 8, tested on run {cfg['test_run']}. `zero_phase` training is mismatched with",
+        "  the causal online filter; `causal` training matches it.",
+        "* Offline = cue-aligned 0.5-2.5 s epochs of the same test data, filtered like the",
+        "  training data (the Phase 2-3 style number).",
+        "* Inside = windows entirely inside a left/right trial. All = every window ending",
+        "  during a trial, including windows that still contain rest.",
+        f"* Threshold = {cfg['rest_quantile']:g} quantile of smoothed confidence over rest",
+        "  windows of the *training* data. Rest active / Trial active = share of rest / trial",
+        "  windows above it (cursor moves); Acc. active = accuracy of the trial windows above it.",
+        "",
+        "| Candidate | Subjects | Offline | Inside, raw | Inside, smoothed | All, smoothed "
+        "| Rest active | Trial active | Acc. active |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for name, row in data["rows"].items():
+        lines.append(
+            f"| {name} | {row['n_subjects']} | {_pct(row['offline_acc'])} | "
+            f"{_pct(row['acc_inside_raw'])} | {_pct(row['acc_inside_smooth'])} | "
+            f"{_pct(row['acc_all_smooth'])} | {_pct(row['rest_active_rate'])} | "
+            f"{_pct(row['imagery_active_rate'])} | {_pct(row['acc_when_active'])} |"
+        )
+    lines.append("")
+    return lines

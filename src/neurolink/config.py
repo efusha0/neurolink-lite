@@ -58,6 +58,9 @@ class PreprocessConfig:
     tmin: float = 0.5
     tmax: float = 2.5
     car: bool = True
+    causal: bool = False
+    """False: zero-phase FIR (offline analysis). True: the stateful causal Butterworth used
+    by the online classifier, so training data matches what the model sees live."""
     channels: tuple[str, ...] | None = None  # None -> all 64 channels
     subjects: tuple[int, ...] = field(default_factory=lambda: DEV_SUBJECTS)
     runs: tuple[int, ...] = MOTOR_IMAGERY_RUNS
@@ -75,8 +78,18 @@ class RealtimeConfig:
     window_s: float = 2.0
     step_s: float = 0.25
     smoothing_alpha: float = 0.3  # EMA factor applied to class probabilities
+    filter_order: int = 4  # Butterworth order of the causal band-pass
+    rest_quantile: float = 0.75
+    """The confidence threshold is this quantile of the smoothed confidence over *rest*
+    windows of the training data; below the threshold the cursor does not move."""
     ws_host: str = "127.0.0.1"
     ws_port: int = 8000
+
+    def window_samples(self, sfreq: float = SFREQ) -> int:
+        return round(self.window_s * sfreq)
+
+    def step_samples(self, sfreq: float = SFREQ) -> int:
+        return round(self.step_s * sfreq)
 
 
 SEED = 42

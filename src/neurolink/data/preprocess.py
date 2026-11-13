@@ -31,6 +31,19 @@ def bandpass(raw: mne.io.BaseRaw, band: tuple[float, float]) -> mne.io.BaseRaw:
     return raw
 
 
+def causal_bandpass(raw: mne.io.BaseRaw, band: tuple[float, float]) -> mne.io.BaseRaw:
+    """Causal Butterworth band-pass, in place: the exact filter the online classifier runs.
+
+    Used to build training data for the real-time model. Unlike :func:`bandpass` the output
+    is delayed and phase-distorted, but it never looks into the future.
+    """
+    from neurolink.realtime.filters import CausalBandpass
+
+    filt = CausalBandpass(band, float(raw.info["sfreq"]), n_channels=len(raw.ch_names))
+    raw._data[:] = filt.process(raw.get_data().T).T
+    return raw
+
+
 def apply_car(raw: mne.io.BaseRaw) -> mne.io.BaseRaw:
     """Common average reference, applied directly to the data (no projector)."""
     raw.set_eeg_reference("average", projection=False, verbose="ERROR")

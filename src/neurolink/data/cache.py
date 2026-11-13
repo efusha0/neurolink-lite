@@ -65,6 +65,7 @@ def config_from_dict(d: dict[str, Any]) -> PreprocessConfig:
         tmin=float(d["tmin"]),
         tmax=float(d["tmax"]),
         car=bool(d["car"]),
+        causal=bool(d.get("causal", False)),
         channels=tuple(d["channels"]) if d["channels"] is not None else None,
         subjects=tuple(int(s) for s in d["subjects"]),
         runs=tuple(int(r) for r in d["runs"]),
@@ -73,9 +74,12 @@ def config_from_dict(d: dict[str, Any]) -> PreprocessConfig:
 
 def cache_key(config: PreprocessConfig) -> str:
     """Short, deterministic hash of a configuration (and of the on-disk format)."""
-    payload = json.dumps(
-        {"format": FORMAT_VERSION, **config_to_dict(config)}, sort_keys=True
-    ).encode()
+    fields = config_to_dict(config)
+    if not fields["causal"]:
+        # ``causal`` was added in Phase 4; leaving the default out keeps the keys of the
+        # caches built before that valid.
+        del fields["causal"]
+    payload = json.dumps({"format": FORMAT_VERSION, **fields}, sort_keys=True).encode()
     return hashlib.sha1(payload).hexdigest()[:12]
 
 

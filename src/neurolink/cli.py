@@ -257,6 +257,48 @@ def report(results_dir: Path = typer.Option(RESULTS_DIR)) -> None:
         typer.echo(f"wrote {p}")
 
 
+@app.command(name="pseudo-online")
+def pseudo_online(
+    subjects: str = typer.Option("all", help='Subjects: "dev" (1-10), "all", "1-5,8".'),
+    epochs_cross: int = typer.Option(30, help="EEGNet epochs for cross-subject models."),
+    epochs_subject: int = typer.Option(100, help="EEGNet epochs for per-subject models."),
+    n_splits: int = typer.Option(5, help="Subject-grouped folds."),
+    threads: int = typer.Option(4, help="Torch CPU threads."),
+    seed: int = typer.Option(SEED),
+    raw_dir: Path = typer.Option(RAW_DIR),
+    cache_dir: Path = typer.Option(CACHE_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """Score every candidate demo model with the online pipeline on held-out recordings."""
+    from neurolink.eval.online_eval import default_makers, run_experiment
+    from neurolink.eval.report import save_pseudo_online
+    from neurolink.utils.seed import set_seed
+
+    _setup_logging(verbose)
+    set_seed(seed)
+    makers = default_makers(seed, epochs_cross, epochs_subject, threads)
+    summary, store = run_experiment(
+        _subjects_option(subjects),
+        seed,
+        makers,
+        n_splits=n_splits,
+        cache_dir=cache_dir,
+        raw_dir=raw_dir,
+    )
+    windows_path = cache_dir / "pseudo_online_windows.npz"
+    np.savez_compressed(str(windows_path), allow_pickle=False, **store.arrays())
+    path = save_pseudo_online(summary, results_dir)
+    typer.echo(f"window-level outputs: {windows_path}")
+    typer.echo(f"wrote {path}")
+    for name, row in summary["rows"].items():
+        typer.echo(
+            f"{name:40s} offline {100 * row['offline_acc']['mean']:5.1f}  "
+            f"inside {100 * row['acc_inside_smooth']['mean']:5.1f}  "
+            f"all {100 * row['acc_all_smooth']['mean']:5.1f}"
+        )
+
+
 @app.command()
 def stream() -> None:
     """Replay recorded EEG over LSL in real time (Phase 4)."""
