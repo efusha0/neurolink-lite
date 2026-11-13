@@ -127,6 +127,10 @@ class OnlineDecoder:
             len(model_ch_names), cfg.window_samples(sfreq), cfg.step_samples(sfreq)
         )
         self.smoother = ProbabilitySmoother(cfg.smoothing_alpha)
+        self.last_filtered: NDArray[np.float32] = np.zeros(
+            (0, len(model_ch_names)), dtype=np.float32
+        )
+        """Preprocessed samples of the most recent chunk (for the waveform display)."""
 
     def reset(self) -> None:
         self.preprocessor.reset()
@@ -134,7 +138,8 @@ class OnlineDecoder:
         self.smoother.reset()
 
     def push(self, chunk: NDArray[np.floating]) -> list[Prediction]:
-        ends, windows = self.windower.push(self.preprocessor.process(chunk))
+        self.last_filtered = self.preprocessor.process(chunk)
+        ends, windows = self.windower.push(self.last_filtered)
         raw = predict_proba_batched(self.model, windows)
         out: list[Prediction] = []
         for end, p in zip(ends.tolist(), raw, strict=True):

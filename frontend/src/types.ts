@@ -11,6 +11,10 @@ export interface PredictionMessage {
   pred: ClassName;
   true: TrueLabel;
   confidence: number;
+  /** False when confidence is below the threshold: the cursor must not move. */
+  active: boolean;
+  /** LSL timestamp (s) of the newest sample in the analysis window. */
+  sample_time: number;
   latency_ms: { stream_to_pred: number; pred_to_ws: number };
 }
 

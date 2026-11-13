@@ -10,6 +10,8 @@ describe("message schema", () => {
       pred: "right",
       true: "right",
       confidence: 0.7,
+      active: true,
+      sample_time: 1234.5,
       latency_ms: { stream_to_pred: 10, pred_to_ws: 1 },
     };
     expect(msg.probs.left + msg.probs.right).toBeCloseTo(1);
