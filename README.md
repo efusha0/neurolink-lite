@@ -1,6 +1,7 @@
 # NeuroLink-lite: Thought-Controlled Cursor (EEG + Deep Learning)
 
-> **Status:** work in progress (Phase 0, skeleton). Results and demo will be added phase by phase.
+> **Status:** work in progress. Data pipeline, CSP+LDA baseline and EEGNet are done
+> (Phases 0-3); the real-time system, UI and demo are next.
 
 NeuroLink-lite is a small, honest, open-source brain-computer interface (BCI) project.
 It classifies EEG recorded while a person *imagines* moving their left or right hand, and
@@ -114,6 +115,15 @@ uv run pytest
 
 _To be written in Phase 6._ Honest notes about accuracy ceilings on EEGMMIDB,
 cross-subject generalization, and the gap between replayed data and a live headset.
+
+Points already known and to be covered there:
+
+- The 10 development subjects (1-10) used for sanity sweeps and for choosing the EEGNet
+  training budget are also part of the 105-subject evaluation, so reported accuracies
+  carry a small optimistic bias.
+- Offline accuracy uses cue-aligned epochs and a zero-phase filter; the online system
+  cannot. The pseudo-online accuracy measured in Phase 4 is the honest estimate.
+- Large inter-subject variability ("BCI illiteracy"); a strong demo subject is a best case.
 
 ## License
 

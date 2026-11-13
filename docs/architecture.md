@@ -5,11 +5,18 @@ decisions that are not obvious from the code.
 
 ## Decisions (Phase 0)
 
-- **Epoch window 0.5 to 2.5 s after the cue.** Two seconds, identical to the online sliding
-  window, so offline accuracy is a fair estimate of online behaviour.
-- **Band-pass before splitting is not leakage.** The 8-30 Hz Butterworth filter has fixed
-  coefficients and learns nothing from the data. Everything that *is* fitted (z-score
-  statistics, CSP filters, EEGNet weights) is fitted on the training fold only.
+- **Epoch window 0.5 to 2.5 s after the cue.** Two seconds, the same length as the online
+  sliding window. Offline accuracy is nevertheless an *optimistic* estimate of online
+  behaviour, for two reasons found in the Phase 3 review: offline epochs are filtered with a
+  zero-phase (non-causal) filter while the online classifier must filter causally, and
+  offline epochs are aligned to the cue while online windows slide freely and often straddle
+  rest and imagery. Phase 4 therefore measures a separate "pseudo-online" accuracy (see
+  below) and reports it next to the offline numbers.
+- **Band-pass before splitting is not leakage.** The 8-30 Hz filter is a zero-phase FIR
+  (MNE ``firwin`` design, about 1.65 s long at 160 Hz) with fixed coefficients, applied per
+  run; it learns nothing from the data. Its support stays inside the 4.1 s trial, so no
+  epoch contains samples of another trial. Everything that *is* fitted (z-score statistics,
+  CSP filters, EEGNet weights) is fitted on the training fold only.
 - **Cross-subject protocol = subject-grouped 5-fold.** Pure leave-one-subject-out would be
   about 105 EEGNet trainings on CPU; grouped 5-fold keeps subjects disjoint at a fraction of the cost.
 - **Demo model trains on runs 4 and 8, replays run 12** of the chosen subject, so the
@@ -37,3 +44,51 @@ decisions that are not obvious from the code.
   ``reg`` in {None, ledoit_wolf, oas, 0.1} changed within-subject accuracy by at most
   2 points (std ~21) and cross-subject by at most 2 points. Within noise; the default
   ``ledoit_wolf`` was kept.
+
+## Decisions (Phase 3)
+
+- **EEGNet-8,2 follows Lawhern et al. (2018)** in structure: temporal convolution with a
+  kernel of half the sampling rate (80 samples), depthwise spatial convolution (D = 2,
+  max-norm 1), separable convolution (F2 = 16), dense layer with max-norm 0.25.
+  Deliberate or inherited deviations from the paper:
+  - *Dropout 0.5 in both protocols.* The paper uses 0.5 within-subject and 0.25
+    cross-subject. We did not re-run with 0.25: choosing between the two after seeing the
+    cross-subject test folds would be tuning on the evaluation set.
+  - *Pooling (4, 8) and the separable kernel (16) are the paper's 128 Hz values* used
+    unchanged at 160 Hz, so the separable kernel spans 0.4 s instead of 0.5 s and the final
+    feature rate is 5 Hz instead of 4 Hz.
+  - *BatchNorm uses PyTorch defaults* (momentum 0.1, eps 1e-5), not the Keras defaults of
+    the reference implementation (0.99 running-average decay, eps 1e-3).
+  - *Input is 8-30 Hz at 160 Hz*, as fixed for the whole project; the paper band-passes
+    4-40 Hz and resamples to 128 Hz.
+  - *No early stopping and no validation split.* The paper selects the best epoch on a
+    validation set; with 36 training epochs per within-subject fold we train for a fixed
+    budget instead.
+- **Small last batch in within-subject training.** 36 training epochs with batch size 32
+  give batches of 32 and 4. BatchNorm statistics on 4 samples are noisy, which may cost
+  some within-subject accuracy. It is not leakage and was left as is; fixing it after the
+  fact would again be tuning on the evaluation folds.
+- **Where the training hyper-parameters come from.** Adam 1e-3 and batch 32 are common
+  EEGNet defaults. How the epoch budgets (100 within-subject, 30 cross-subject) were
+  chosen was not logged. A 10-subject motor-channel cache was built shortly before the full
+  runs, which suggests trial runs on the development subjects, but the extent of that
+  search is unknown. The development subjects (1-10)
+  are also part of the 105-subject evaluation, so these choices (and the Phase 2 sanity
+  sweep) carry a small optimistic bias. This goes into the README "Limitations" section.
+- **Per-subject accuracy is computed from each subject's own predictions.** Until the
+  Phase 3 review, cross-subject results assigned the fold accuracy to every test subject,
+  which hid the inter-subject spread (0/105 subjects >= 70 % was reported; the real counts
+  are in ``results/RESULTS.md``). Means and pooled accuracies were unaffected. Tables now
+  report mean +/- std across subjects; the fold std is a separate column.
+- **Reproducibility.** Re-running CSP+LDA (motor) and EEGNet cross-subject from the cache
+  reproduced every fold accuracy exactly on the same machine (seed 42, 4 CPU threads).
+  Bit-identical results across machines or PyTorch versions are not guaranteed.
+
+## Requirements carried into Phase 4
+
+- **Pseudo-online accuracy.** Evaluate the online pipeline offline on held-out data:
+  causal stateful band-pass on the continuous recording, CAR, 2 s windows every 0.25 s
+  that are *not* aligned to the cue, the same smoothing as the live system. Windows are
+  scored against the annotation active at the window end. The model is trained without
+  access to the replayed data (held-out run or held-out subjects). Report this number
+  beside the offline accuracy, for the demo subject and as an average over subjects.

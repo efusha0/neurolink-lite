@@ -43,6 +43,8 @@ Produce a comparison table and confusion matrices.
   smooths probabilities.
 - Sends prediction + confidence to the browser via FastAPI WebSocket.
 - Measure and report end-to-end latency.
+- Measure "pseudo-online" accuracy on held-out data with the online pipeline (causal filter,
+  sliding windows not aligned to the cue) and report it next to the offline results.
 
 **Phase 5 — UI:** Moving ball/cursor on canvas, live EEG waveform view (a few channels),
 class probability bar, "true label vs prediction" indicator (for transparency),
@@ -56,6 +58,8 @@ dataset DOI 10.13026/C28G6P and the BCI2000 paper, IEEE TBME 2004) and a note th
 is under the ODC-By v1.0 license. Also mention the large inter-subject variability (BCI
 illiteracy), and if the live demo uses a strong subject, state clearly that it is a best case
 and report the average.
+"Limitations" must also state that the 10 development subjects overlap the evaluation set
+(small optimistic bias) and the offline vs pseudo-online gap.
 
 ## Rules
 - STOP at the end of every phase: summarize what you did, test results, and open questions,
