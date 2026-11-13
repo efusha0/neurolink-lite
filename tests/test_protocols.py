@@ -118,10 +118,15 @@ def test_cross_subject_per_subject_accuracy_is_not_the_fold_accuracy() -> None:
     """Regression: subjects sharing a test fold must keep their own accuracies."""
     ds = make_synthetic_dataset(n_subjects=4, epochs_per_subject=20)
     ds.X[:, 0, 0] = ds.y
-    ds.X[:, 1, 0] = np.isin(ds.subjects, [1, 3]).astype(np.float32)
+    result = cross_subject_cv(ds, RecordingModel, "fake", n_splits=2, seed=0)
+    # Decode exactly one subject of every test fold, so fold accuracy is 0.5 everywhere.
+    good = [f.test_subjects[0] for f in result.folds]
+    ds.X[:, 1, 0] = np.isin(ds.subjects, good).astype(np.float32)
     result = cross_subject_cv(ds, FirstSubjectOracle, "fake", n_splits=2, seed=0)
     assert all(len(f.test_subjects) == 2 for f in result.folds)
-    assert result.per_subject_accuracy() == {1: 1.0, 2: 0.0, 3: 1.0, 4: 0.0}
+    assert all(f.scores.accuracy == 0.5 for f in result.folds)
+    expected = {s: (1.0 if s in good else 0.0) for s in (1, 2, 3, 4)}
+    assert result.per_subject_accuracy() == expected
     for fold in result.folds:
         assert sum(fold.subject_total.values()) == fold.scores.n
         assert sum(fold.subject_correct.values()) == round(fold.scores.accuracy * fold.scores.n)

@@ -18,7 +18,9 @@ from sklearn.preprocessing import StandardScaler
 @dataclass(frozen=True)
 class CSPLDAConfig:
     n_components: int = 6
-    """Number of spatial filters (the top n/2 and bottom n/2 eigenvectors)."""
+    """Number of spatial filters kept. MNE's default ``component_order="mutual_info"`` ranks
+    the generalized eigenvectors by how well they separate the classes and keeps the best
+    ``n_components`` (not a fixed top-n/2 plus bottom-n/2 split)."""
     reg: str | None = "ledoit_wolf"
     """Covariance shrinkage; helps with 64 channels and ~36 training trials per fold."""
     shrinkage: str | float | None = "auto"
