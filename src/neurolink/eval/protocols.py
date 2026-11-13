@@ -38,6 +38,10 @@ class FoldResult:
     train_subjects: list[int]
     test_subjects: list[int]
     fit_seconds: float
+    subject_correct: dict[int, int] = field(default_factory=dict)
+    """Correct test predictions per test subject."""
+    subject_total: dict[int, int] = field(default_factory=dict)
+    """Test epochs per test subject."""
 
 
 @dataclass
@@ -62,12 +66,18 @@ class ProtocolResult:
         return float(np.trace(cm) / cm.sum())
 
     def per_subject_accuracy(self) -> dict[int, float]:
-        """Mean accuracy per test subject (within-subject: one entry per subject)."""
-        acc: dict[int, list[float]] = {}
+        """Accuracy of every subject over its own test epochs, pooled across folds.
+
+        Computed from per-subject prediction counts, never from fold accuracies: in the
+        cross-subject protocol a fold holds many subjects whose accuracies differ widely.
+        """
+        correct: dict[int, int] = {}
+        total: dict[int, int] = {}
         for f in self.folds:
-            for s in f.test_subjects:
-                acc.setdefault(s, []).append(f.scores.accuracy)
-        return {s: float(np.mean(v)) for s, v in sorted(acc.items())}
+            for s, n in f.subject_total.items():
+                correct[s] = correct.get(s, 0) + f.subject_correct[s]
+                total[s] = total.get(s, 0) + n
+        return {s: correct[s] / total[s] for s in sorted(total)}
 
 
 def grouped_subject_folds(
@@ -112,12 +122,18 @@ def _run_fold(
     model.fit(dataset.X[train_idx], dataset.y[train_idx])
     fit_s = time.perf_counter() - t0
     y_pred = np.asarray(model.predict(dataset.X[test_idx]), dtype=np.int64)
+    y_true = dataset.y[test_idx]
+    test_subjects = dataset.subjects[test_idx]
+    hits = y_pred == y_true
+    unique_test = sorted(set(test_subjects.tolist()))
     return FoldResult(
         name=name,
-        scores=score(dataset.y[test_idx], y_pred),
+        scores=score(y_true, y_pred),
         train_subjects=sorted(set(dataset.subjects[train_idx].tolist())),
-        test_subjects=sorted(set(dataset.subjects[test_idx].tolist())),
+        test_subjects=unique_test,
         fit_seconds=fit_s,
+        subject_correct={s: int(hits[test_subjects == s].sum()) for s in unique_test},
+        subject_total={s: int((test_subjects == s).sum()) for s in unique_test},
     )
 
 

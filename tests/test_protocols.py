@@ -97,3 +97,37 @@ def test_fold_results_are_reproducible(synthetic_dataset: Dataset) -> None:
     a = within_subject_cv(synthetic_dataset, make_csp_lda, "m", seed=7)
     b = within_subject_cv(synthetic_dataset, make_csp_lda, "m", seed=7)
     np.testing.assert_array_equal(a.accuracies, b.accuracies)
+
+
+class FirstSubjectOracle:
+    """Predicts the true label for epochs tagged 1.0 and the wrong one for the rest."""
+
+    def fit(self, X, y):  # type: ignore[no-untyped-def]
+        return self
+
+    def predict(self, X):  # type: ignore[no-untyped-def]
+        truth = X[:, 0, 0].astype(np.int64)  # label smuggled into the signal
+        right = X[:, 1, 0] > 0.5  # 1.0 only for the subject that should be decoded
+        return np.where(right, truth, 1 - truth)
+
+    def predict_proba(self, X):  # type: ignore[no-untyped-def]
+        raise NotImplementedError
+
+
+def test_cross_subject_per_subject_accuracy_is_not_the_fold_accuracy() -> None:
+    """Regression: subjects sharing a test fold must keep their own accuracies."""
+    ds = make_synthetic_dataset(n_subjects=4, epochs_per_subject=20)
+    ds.X[:, 0, 0] = ds.y
+    ds.X[:, 1, 0] = np.isin(ds.subjects, [1, 3]).astype(np.float32)
+    result = cross_subject_cv(ds, FirstSubjectOracle, "fake", n_splits=2, seed=0)
+    assert all(len(f.test_subjects) == 2 for f in result.folds)
+    assert result.per_subject_accuracy() == {1: 1.0, 2: 0.0, 3: 1.0, 4: 0.0}
+    for fold in result.folds:
+        assert sum(fold.subject_total.values()) == fold.scores.n
+        assert sum(fold.subject_correct.values()) == round(fold.scores.accuracy * fold.scores.n)
+
+
+def test_within_subject_per_subject_accuracy_pools_folds(synthetic_dataset: Dataset) -> None:
+    result = within_subject_cv(synthetic_dataset, RecordingModel, "fake", n_splits=5, seed=0)
+    # RecordingModel always predicts class 0 and classes are balanced.
+    assert result.per_subject_accuracy() == {1: 0.5, 2: 0.5, 3: 0.5, 4: 0.5}

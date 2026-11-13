@@ -19,6 +19,7 @@ RESULTS_MD = "RESULTS.md"
 def result_to_dict(result: ProtocolResult, extra: dict[str, Any] | None = None) -> dict[str, Any]:
     acc = result.accuracies
     per_subject = result.per_subject_accuracy()
+    subj = np.asarray(list(per_subject.values()), dtype=np.float64)
     cm = result.confusion
     return {
         "model": result.model,
@@ -34,6 +35,11 @@ def result_to_dict(result: ProtocolResult, extra: dict[str, Any] | None = None) 
         "accuracy_min": float(acc.min()),
         "accuracy_max": float(acc.max()),
         "pooled_accuracy": result.pooled_accuracy,
+        "subject_accuracy_mean": float(subj.mean()),
+        "subject_accuracy_std": float(subj.std(ddof=1)) if len(subj) > 1 else 0.0,
+        "subject_accuracy_median": float(np.median(subj)),
+        "subject_accuracy_min": float(subj.min()),
+        "subject_accuracy_max": float(subj.max()),
         "balanced_accuracy_mean": float(
             np.mean([f.scores.balanced_accuracy for f in result.folds])
         ),
@@ -81,22 +87,26 @@ def write_markdown_table(results_dir: Path = RESULTS_DIR) -> Path:
     lines = [
         "# Results",
         "",
-        "Binary left/right motor imagery, chance = 50 %. Accuracy is mean +/- std over",
-        "folds (within-subject: subject x fold; cross-subject: subject-grouped folds).",
+        "Binary left/right motor imagery, chance = 50 %. Every statistic except the last",
+        "column is over per-subject accuracies (each subject's own test epochs, pooled",
+        'across folds), so the spread shows inter-subject variability. "Fold std" is the',
+        "std over folds (within-subject: subject x fold, 9 test epochs each, hence large;",
+        "cross-subject: the 5 subject-grouped folds).",
         "Regenerated automatically; do not edit by hand.",
         "",
-        "| Model | Protocol | Subjects | Test epochs | Accuracy (%) | Median | Min-Max "
-        "| Pooled | Subjects >= 70 % |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Model | Protocol | Subjects | Test epochs | Accuracy (%), mean +/- subject std "
+        "| Median | Min-Max | Pooled | Subjects >= 70 % | Fold std |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in rows:
         lines.append(
             f"| {r['model']} | {r['protocol'].replace('_', '-')} | {r['n_subjects']} | "
             f"{r['n_test_epochs']} | "
-            f"{100 * r['accuracy_mean']:.1f} +/- {100 * r['accuracy_std']:.1f} | "
-            f"{100 * r['accuracy_median']:.1f} | "
-            f"{100 * r['accuracy_min']:.0f}-{100 * r['accuracy_max']:.0f} | "
-            f"{100 * r['pooled_accuracy']:.1f} | {r['subjects_above_70']}/{r['n_subjects']} |"
+            f"{100 * r['subject_accuracy_mean']:.1f} +/- {100 * r['subject_accuracy_std']:.1f} | "
+            f"{100 * r['subject_accuracy_median']:.1f} | "
+            f"{100 * r['subject_accuracy_min']:.0f}-{100 * r['subject_accuracy_max']:.0f} | "
+            f"{100 * r['pooled_accuracy']:.1f} | {r['subjects_above_70']}/{r['n_subjects']} | "
+            f"{100 * r['accuracy_std']:.1f} |"
         )
     lines.append("")
     for r in rows:

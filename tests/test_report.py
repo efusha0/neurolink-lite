@@ -14,6 +14,8 @@ def test_result_dict_fields(synthetic_dataset: Dataset) -> None:
     d = result_to_dict(result, extra={"channels": "all"})
     assert d["model"] == "csp_lda" and d["protocol"] == "within_subject"
     assert d["n_folds"] == 20 and d["n_subjects"] == 4
+    assert 0.0 <= d["subject_accuracy_min"] <= d["subject_accuracy_mean"] <= 1.0
+    assert d["subject_accuracy_std"] >= 0.0
     assert d["n_test_epochs"] == synthetic_dataset.n_epochs
     assert 0.0 <= d["accuracy_mean"] <= 1.0
     assert len(d["confusion"]) == 2 and len(d["confusion"][0]) == 2
