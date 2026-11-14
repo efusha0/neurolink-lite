@@ -54,13 +54,23 @@ class LslEegReader:
         self.ch_names = tuple(names)
 
     def pull(self, timeout: float = 0.2) -> tuple[NDArray[np.float32], NDArray[np.float64]]:
-        """Block up to ``timeout`` for data; returns empty arrays if nothing arrived."""
-        samples, stamps = self._inlet.pull_chunk(timeout=timeout, max_samples=4096)
+        """Return whatever has arrived, waiting up to ``timeout`` for the first sample.
+
+        ``pull_chunk`` with a timeout would wait the *whole* timeout trying to fill its
+        buffer, which adds up to ``timeout`` of latency to every prediction (measured:
+        p50 107 ms, p95 202 ms with a 0.2 s timeout). So: take what is there without
+        waiting; only if nothing is there, block for a single sample and then drain.
+        """
+        samples, stamps = self._inlet.pull_chunk(timeout=0.0, max_samples=4096)
         if not stamps:
-            return (
-                np.zeros((0, self.n_channels), dtype=np.float32),
-                np.zeros(0, dtype=np.float64),
-            )
+            sample, stamp = self._inlet.pull_sample(timeout=timeout)
+            if sample is None:
+                return (
+                    np.zeros((0, self.n_channels), dtype=np.float32),
+                    np.zeros(0, dtype=np.float64),
+                )
+            more, more_stamps = self._inlet.pull_chunk(timeout=0.0, max_samples=4096)
+            samples, stamps = [sample, *more], [stamp, *more_stamps]
         return np.asarray(samples, dtype=np.float32), np.asarray(stamps, dtype=np.float64)
 
     def close(self) -> None:

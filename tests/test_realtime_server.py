@@ -254,6 +254,8 @@ def test_lsl_replay_reaches_decoder_in_real_time() -> None:
     assert 8 <= len(preds) <= 20
     gaps = np.diff([m["sample_time"] for m in preds])
     np.testing.assert_allclose(gaps, 0.25, atol=0.02)  # no samples lost, real-time pace
+    # The window ends on a chunk boundary, so a prediction must not wait for more data:
+    # a reader that blocks for its whole timeout would show a median near 100 ms.
     latency = [m["latency_ms"]["stream_to_pred"] for m in preds]
-    assert 0.0 <= float(np.median(latency)) < 250.0
+    assert 0.0 <= float(np.median(latency)) < 60.0
     assert {m["true"] for m in preds} <= {"rest", "right", None}

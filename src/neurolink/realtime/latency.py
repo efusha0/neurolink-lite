@@ -6,10 +6,12 @@ Stages (all on the LSL clock of one machine):
   moment the smoothed prediction exists (LSL transport + chunking + filter + model).
 * ``pred_to_ws``: from there to the moment the message is handed to the WebSocket.
 * ``end_to_end``: acquisition time of the newest sample to reception by a WebSocket
-  client (measured by ``neurolink latency`` with a local client).
+  client (measured by ``neurolink latency`` with a local client; no browser rendering).
 
 The 2 s analysis window is *not* latency in this sense, but it does delay how fast a
-change of intent shows up; that is reported separately as the reaction to cue onset.
+change of intent shows up: a window ending shortly after a cue still contains mostly
+rest. That cost is visible in the pseudo-online results as the gap between the accuracy
+of windows entirely inside a trial and of all windows ending during a trial.
 """
 
 from __future__ import annotations

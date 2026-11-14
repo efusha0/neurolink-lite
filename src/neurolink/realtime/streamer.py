@@ -92,7 +92,9 @@ class ReplayStreamer:
                     time.sleep(delay)
                 while next_event < len(events) and events[next_event][0] < end:
                     index, name = events[next_event]
-                    self._markers.push_sample([name], t0 + (index + 1) / self.rate)
+                    # Sample ``index`` is stamped t0 + (index + 1) / rate; the marker goes
+                    # half a sample earlier so "last marker <= sample time" is unambiguous.
+                    self._markers.push_sample([name], t0 + (index + 0.5) / self.rate)
                     next_event += 1
                 self._eeg.push_chunk(data[start:end].tolist(), due)
                 self.n_sent += end - start
