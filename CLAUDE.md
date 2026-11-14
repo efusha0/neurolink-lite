@@ -60,6 +60,11 @@ illiteracy), and if the live demo uses a strong subject, state clearly that it i
 and report the average.
 "Limitations" must also state that the 10 development subjects overlap the evaluation set
 (small optimistic bias) and the offline vs pseudo-online gap.
+README must also report these Phase 4 findings: the measured cost of the filter mismatch
+(zero-phase training vs causal online filter: not significant), the loss from window
+alignment (3-5 points from offline to live, 5 for the demo model), the offline vs pseudo-online comparison table,
+and that the model does not detect rest: the confidence threshold only mutes low-confidence
+predictions (the "Midas touch" problem of BCIs).
 
 ## Rules
 - STOP at the end of every phase: summarize what you did, test results, and open questions,
