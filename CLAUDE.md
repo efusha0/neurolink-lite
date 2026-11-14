@@ -84,5 +84,5 @@ Update this checklist when I approve a phase.
 - [x] Phase 2 — Baseline (CSP + LDA)
 - [x] Phase 3 — EEGNet
 - [x] Phase 4 — Real-time system
-- [ ] Phase 5 — UI
+- [x] Phase 5 — UI
 - [ ] Phase 6 — Polish
