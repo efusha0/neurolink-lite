@@ -4,9 +4,108 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NeuroLink-lite</title>
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <main id="app"></main>
+    <main id="app">
+      <header class="top">
+        <div>
+          <h1>NeuroLink-lite</h1>
+          <p class="subtitle">
+            Left / right hand motor imagery decoded from EEG, replayed from a recording.
+            <span id="provenance"></span>
+          </p>
+        </div>
+        <div id="status" class="status status-closed">connecting…</div>
+      </header>
+
+      <section class="card">
+        <canvas id="arena" class="arena" aria-label="Cursor and targets"></canvas>
+      </section>
+
+      <section class="row">
+        <div class="card grow">
+          <h2>Class probability <span class="hint">(smoothed)</span></h2>
+          <div class="prob-labels">
+            <span id="prob-left" class="left">Left –</span>
+            <span id="prob-right" class="right">Right –</span>
+          </div>
+          <div id="prob-bar" class="prob-bar">
+            <div id="prob-fill" class="prob-fill"></div>
+            <div class="prob-centre"></div>
+            <div id="prob-threshold-left" class="prob-threshold"></div>
+            <div id="prob-threshold-right" class="prob-threshold"></div>
+          </div>
+          <p class="hint">
+            The cursor moves only when the bar passes a dashed line (confidence threshold
+            <span id="threshold-value">–</span>).
+          </p>
+        </div>
+        <div class="card indicator">
+          <h2>True label vs prediction</h2>
+          <div class="tiles">
+            <div class="tile">
+              <span class="tile-label">Recording says</span>
+              <span id="true-label" class="tile-value">–</span>
+            </div>
+            <div class="tile">
+              <span class="tile-label">Decoder says</span>
+              <span id="pred-label" class="tile-value">–</span>
+            </div>
+            <div class="tile">
+              <span class="tile-label">Cursor</span>
+              <span id="cursor-label" class="tile-value">–</span>
+            </div>
+          </div>
+          <p id="verdict" class="verdict">Waiting for data.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>
+          Filtered EEG, 8–30 Hz
+          <span class="hint">
+            background: <span class="left">■</span> left cue <span class="right">■</span> right cue
+          </span>
+        </h2>
+        <canvas id="eeg" class="eeg" aria-label="EEG traces"></canvas>
+      </section>
+
+      <section class="row stats">
+        <div class="card stat">
+          <h2>Target game</h2>
+          <p class="big"><span id="game-hits">0</span> / <span id="game-trials">0</span> hits</p>
+          <p class="hint" id="game-detail">wrong side 0 · timeouts 0</p>
+        </div>
+        <div class="card stat">
+          <h2>Decoder, this session</h2>
+          <p class="big" id="acc-trial">–</p>
+          <p class="hint" id="acc-detail">of windows during a cue are correct</p>
+        </div>
+        <div class="card stat">
+          <h2>False commands at rest</h2>
+          <p class="big" id="rest-active">–</p>
+          <p class="hint">of rest windows move the cursor (the model cannot detect rest)</p>
+        </div>
+        <div class="card stat">
+          <h2>Pipeline latency</h2>
+          <p class="big" id="latency">–</p>
+          <p class="hint">
+            sample to WebSocket, median. The 2 s window and the smoothing still delay the
+            cursor's reaction to a cue by more than a second.
+          </p>
+        </div>
+      </section>
+
+      <footer>
+        <p id="reference"></p>
+        <p>
+          The cue and the targets come from the recording; nobody is steering. The decoder
+          never reads the true label: it is shown here only so that errors are visible.
+          <button id="reset" type="button">Reset counters</button>
+        </p>
+      </footer>
+    </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

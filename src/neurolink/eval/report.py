@@ -134,6 +134,7 @@ def write_markdown_table(results_dir: Path = RESULTS_DIR) -> Path:
     lines += pseudo_online_markdown(results_dir)
     lines += realtime_markdown(results_dir)
     lines += behavioural_markdown(results_dir)
+    lines += game_markdown(results_dir)
     path = results_dir / RESULTS_MD
     path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return path
@@ -219,6 +220,7 @@ REALTIME_DIR = "realtime"
 DEMO_MODEL_JSON = "demo_model.json"
 LATENCY_JSON = "latency.json"
 BEHAVIOURAL_JSON = "behavioural_latency.json"
+GAME_JSON = "game.json"
 
 
 def save_realtime(name: str, payload: dict[str, Any], results_dir: Path = RESULTS_DIR) -> Path:
@@ -397,3 +399,72 @@ def behavioural_markdown(results_dir: Path = RESULTS_DIR) -> list[str]:
         "",
     ]
     return lines
+
+
+def game_markdown(results_dir: Path = RESULTS_DIR) -> list[str]:
+    """Markdown section for the cursor-speed selection and the game outcome, if present."""
+    data = load_realtime(GAME_JSON, results_dir)
+    if data is None:
+        return []
+    subject = f"S{data['demo_subject']:03d}"
+    runs = "+".join(str(r) for r in data["train_runs"])
+    lines = [
+        "## Target game",
+        "",
+        "The UI game simulated on the pseudo-online outputs: the cursor starts at the centre",
+        "at every cue, a target sits at the cued wall, and the cursor moves with velocity",
+        "(p_right - p_left) / travel time while the prediction is above the threshold.",
+        f"Rule for the travel time: {data['rule']}.",
+        "",
+        f"| Travel time (s) | Hits, {subject} runs {runs} | Wrong side | Timeouts | Hits - wrong |",
+        "|---:|---:|---:|---:|---:|",
+    ]
+    for t, row in data["selection_table"].items():
+        mark = " **(selected)**" if float(t) == data["travel_time_s"] else ""
+        lines.append(
+            f"| {float(t):g}{mark} | {row['hits']}/{row['trials']} | {row['wrong']} "
+            f"| {row['timeouts']} | {row['net']} |"
+        )
+    test, everyone = data["demo_test_run"], data["all_subjects"]
+    lines += [
+        "",
+        f"With {data['travel_time_s']:g} s, on data that played no part in the choice:",
+        "",
+        "| Data | Trials | Hits (%) | Wrong side (%) | Timeouts (%) | Median time to hit (s) |",
+        "|---|---:|---:|---:|---:|---:|",
+        f"| {subject}, run {data['test_run']} (the demo) | {test['trials']} "
+        f"| {_pct1(test['hit_rate'])} | {_pct1(test['wrong_rate'])} "
+        f"| {_pct1(test['timeout_rate'])} | {_sec(test['median_hit_time_s'])} |",
+        f"| Mean of {everyone['n_subjects']} subjects, all runs | - "
+        f"| {_pct1(everyone['hit_rate_mean'])} | {_pct1(everyone['wrong_rate_mean'])} "
+        f"| {_pct1(everyone['timeout_rate_mean'])} | - |",
+        "",
+        f"{everyone['subjects_hit_rate_above_70']}/{everyone['n_subjects']} subjects hit at"
+        " least 70 % of their targets.",
+        "",
+    ]
+    return lines
+
+
+def ui_info(results_dir: Path = RESULTS_DIR, candidate: str = "") -> dict[str, Any]:
+    """What the browser UI needs from the result files, served through ``/info``.
+
+    The cursor speed chosen by ``neurolink game-speed`` and the offline reference numbers
+    the UI prints next to the live session (best-case run vs average of all subjects).
+    Empty when the game results do not exist; the UI then falls back to its defaults.
+    """
+    game = load_realtime(GAME_JSON, results_dir)
+    if game is None:
+        return {}
+    reference: dict[str, Any] = {
+        "demo_run_hit_rate": game["demo_test_run"]["hit_rate"],
+        "demo_run_trials": game["demo_test_run"]["trials"],
+        "mean_hit_rate": game["all_subjects"]["hit_rate_mean"],
+        "n_subjects": game["all_subjects"]["n_subjects"],
+    }
+    pseudo = results_dir / PSEUDO_ONLINE_DIR / PSEUDO_ONLINE_JSON
+    if pseudo.exists():
+        rows = json.loads(pseudo.read_text(encoding="utf-8"))["rows"]
+        if candidate in rows:
+            reference["mean_acc_all_smooth"] = rows[candidate]["acc_all_smooth"]["mean"]
+    return {"cursor_travel_time_s": game["travel_time_s"], "reference": reference}

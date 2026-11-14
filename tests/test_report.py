@@ -8,14 +8,17 @@ from neurolink.eval.protocols import cross_subject_cv, within_subject_cv
 from neurolink.eval.report import (
     BEHAVIOURAL_JSON,
     DEMO_MODEL_JSON,
+    GAME_JSON,
     LATENCY_JSON,
     behavioural_markdown,
+    game_markdown,
     load_realtime,
     load_results,
     realtime_markdown,
     result_to_dict,
     save_realtime,
     save_result,
+    ui_info,
     write_markdown_table,
 )
 from neurolink.models.csp_lda import make_csp_lda
@@ -144,3 +147,47 @@ def test_behavioural_latency_section(tmp_path: Path) -> None:
         "| All 105 subjects | right class, above threshold | 4725 | 50.0 | - | 0.80 | 1.80 |" in md
     )
     assert "right class in 34.5 % of trials, wrong class in 20.3 %, none at all in 45.2 %" in md
+
+
+def _game_payload() -> dict[str, object]:
+    def row(hits: int, wrong: int, trials: int = 30) -> dict[str, object]:
+        return {"trials": trials, "hits": hits, "wrong": wrong,
+                "timeouts": trials - hits - wrong, "net": hits - wrong}  # fmt: skip
+
+    return {
+        "rule": "the rule", "demo_subject": 7, "train_runs": [4, 8], "test_run": 12,
+        "travel_time_s": 1.0,
+        "selection_table": {"0.75": row(15, 3), "1": row(14, 2), "1.5": row(11, 0)},
+        "demo_test_run": {"trials": 15, "hit_rate": 0.8, "wrong_rate": 0.0,
+                          "timeout_rate": 0.2, "median_hit_time_s": 3.27},
+        "all_subjects": {"n_subjects": 105, "hit_rate_mean": 0.196, "wrong_rate_mean": 0.07,
+                         "timeout_rate_mean": 0.734, "subjects_hit_rate_above_70": 0},
+    }  # fmt: skip
+
+
+def test_game_section_and_ui_info(tmp_path: Path) -> None:
+    assert game_markdown(tmp_path) == []
+    assert ui_info(tmp_path, "cross/eegnet/causal") == {}  # UI falls back to its defaults
+
+    save_realtime(GAME_JSON, _game_payload(), tmp_path)
+    md = (tmp_path / "RESULTS.md").read_text(encoding="utf-8")
+    assert "## Target game" in md and "Rule for the travel time: the rule." in md
+    assert "| 1 **(selected)** | 14/30 | 2 | 14 | 12 |" in md
+    assert "| 0.75 | 15/30 | 3 | 12 | 12 |" in md
+    assert "| S007, run 12 (the demo) | 15 | 80.0 | 0.0 | 20.0 | 3.27 |" in md
+    assert "| Mean of 105 subjects, all runs | - | 19.6 | 7.0 | 73.4 | - |" in md
+    assert "0/105 subjects hit at least 70 % of their targets." in md
+
+    info = ui_info(tmp_path, "cross/eegnet/causal")
+    assert info["cursor_travel_time_s"] == 1.0
+    assert info["reference"] == {
+        "demo_run_hit_rate": 0.8, "demo_run_trials": 15, "mean_hit_rate": 0.196,
+        "n_subjects": 105,
+    }  # fmt: skip
+    # With the pseudo-online summary present, the population accuracy is added.
+    pseudo = tmp_path / "pseudo_online" / "pseudo_online.json"
+    pseudo.parent.mkdir()
+    rows = {"cross/eegnet/causal": {"acc_all_smooth": {"mean": 0.61, "std": 0.09}}}
+    pseudo.write_text(json.dumps({"rows": rows}), encoding="utf-8")
+    assert ui_info(tmp_path, "cross/eegnet/causal")["reference"]["mean_acc_all_smooth"] == 0.61
+    assert "mean_acc_all_smooth" not in ui_info(tmp_path, "other")["reference"]

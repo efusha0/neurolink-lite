@@ -487,17 +487,21 @@ def serve(
     host: str = typer.Option("127.0.0.1"),
     port: int = typer.Option(8000),
     timeout: float = typer.Option(10.0, help="Seconds to wait for the LSL EEG stream."),
+    results_dir: Path = typer.Option(RESULTS_DIR),
     verbose: bool = typer.Option(False, "--verbose", "-v"),
 ) -> None:
     """Run the online classifier on the LSL stream and serve predictions over WebSocket."""
     import uvicorn
 
+    from neurolink.eval.report import ui_info
+    from neurolink.realtime.demo_model import DEMO_CANDIDATE
     from neurolink.realtime.live import build_live
 
     _setup_logging(verbose)
     bundle = _load_bundle(model_path)
+    extra_info = ui_info(results_dir, str(bundle.meta.get("candidate", DEMO_CANDIDATE)))
     try:
-        live = build_live(bundle, timeout=timeout)
+        live = build_live(bundle, timeout=timeout, extra_info=extra_info)
     except (TimeoutError, ValueError) as exc:
         typer.secho(f"{exc}. Start `neurolink stream` first.", err=True, fg=typer.colors.RED)
         raise typer.Exit(code=1) from exc
@@ -600,6 +604,54 @@ def behavioural_latency(
             f"median of reached {st['quantiles_reached_s']['p50']:.2f} s"
         )
     typer.echo(f"wrote {save_realtime(BEHAVIOURAL_JSON, result, results_dir)}")
+
+
+@app.command(name="game-speed")
+def game_speed(
+    cache_dir: Path = typer.Option(CACHE_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+) -> None:
+    """Choose the UI cursor speed on the demo subject's runs 4 and 8; report run 12 as is."""
+    import json
+
+    from neurolink.eval.game import game_report
+    from neurolink.eval.online_eval import TEST_RUN, TRAIN_RUNS
+    from neurolink.eval.report import (
+        GAME_JSON,
+        PSEUDO_ONLINE_DIR,
+        PSEUDO_ONLINE_JSON,
+        save_realtime,
+    )
+    from neurolink.realtime.demo_model import DEMO_CANDIDATE
+
+    windows_path = cache_dir / "pseudo_online_windows.npz"
+    summary_path = results_dir / PSEUDO_ONLINE_DIR / PSEUDO_ONLINE_JSON
+    if not (windows_path.exists() and summary_path.exists()):
+        typer.secho(
+            f"needs {windows_path} and {summary_path}; run `neurolink pseudo-online` first.",
+            err=True,
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1)
+    demo_subject = _demo_subject(results_dir)
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    keys = ("subject", "run", "label")
+    with np.load(windows_path) as npz:
+        arrays = {
+            k: npz[k] for k in npz.files if k in keys or k.startswith(f"smooth::{DEMO_CANDIDATE}/")
+        }
+    result = game_report(arrays, summary, DEMO_CANDIDATE, demo_subject, TRAIN_RUNS, TEST_RUN)
+    for t, row in result["selection_table"].items():
+        typer.echo(
+            f"travel time {float(t):4.2f} s: hits {row['hits']:2d}, wrong {row['wrong']:2d}, "
+            f"timeouts {row['timeouts']:2d}, net {row['net']:3d}  ({row['trials']} trials)"
+        )
+    test = result["demo_test_run"]
+    typer.echo(
+        f"selected {result['travel_time_s']:g} s; S{demo_subject:03d} run {TEST_RUN}: "
+        f"{test['hits']}/{test['trials']} hits, {test['wrong']} wrong, {test['timeouts']} timeouts"
+    )
+    typer.echo(f"wrote {save_realtime(GAME_JSON, result, results_dir)}")
 
 
 @app.command()

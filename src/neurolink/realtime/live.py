@@ -21,7 +21,7 @@ from neurolink.realtime.latency import LatencyTracker
 from neurolink.realtime.lsl_client import LslEegReader, LslMarkerReader
 from neurolink.realtime.online import OnlineDecoder
 from neurolink.realtime.pseudo_online import Recording
-from neurolink.realtime.server import DecodeWorker, Emit, Hub, create_app
+from neurolink.realtime.server import DISPLAY_DECIMATION, DecodeWorker, Emit, Hub, create_app
 from neurolink.realtime.streamer import DEFAULT_CHUNK, EEG_STREAM, MARKER_STREAM, ReplayStreamer
 
 log = logging.getLogger(__name__)
@@ -68,6 +68,7 @@ def build_live(
     marker_name: str = MARKER_STREAM,
     timeout: float = 10.0,
     marker_timeout: float = 3.0,
+    extra_info: dict[str, Any] | None = None,
 ) -> LiveSystem:
     """Resolve the LSL streams and build the FastAPI app around a decode worker.
 
@@ -98,7 +99,13 @@ def build_live(
         worker.start()
         return worker
 
-    info = {**public_meta(bundle), "eeg_stream": eeg_name, "sfreq": reader.sfreq}
+    info = {
+        **public_meta(bundle),
+        "eeg_stream": eeg_name,
+        "sfreq": reader.sfreq,
+        "display_rate_hz": reader.sfreq / DISPLAY_DECIMATION,
+        **(extra_info or {}),
+    }
     return LiveSystem(create_app(hub, start, info=info), hub, reader, markers)
 
 

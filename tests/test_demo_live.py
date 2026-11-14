@@ -105,6 +105,7 @@ def test_commands_fail_cleanly_without_a_model_or_selection(tmp_path: Path) -> N
         ["train-demo", "--results-dir", empty],
         ["pseudo-online", "--resummarize", "--results-dir", empty, "--cache-dir", empty],
         ["behavioural-latency", "--results-dir", empty, "--cache-dir", empty],
+        ["game-speed", "--results-dir", empty, "--cache-dir", empty],
     ):
         result = runner.invoke(app, args)
         assert result.exit_code == 1, (args, result.output)

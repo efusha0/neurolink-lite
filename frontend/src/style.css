@@ -1,0 +1,269 @@
+:root {
+  --background: #0e1116;
+  --panel: #161b22;
+  --border: #262d38;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --left: #58a6ff;
+  --right: #f0883e;
+  --rest: #6e7681;
+  --hit: #3fb950;
+  --wrong: #f85149;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+#app {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+p.hint {
+  margin: 8px 0 0;
+}
+
+.left {
+  color: var(--left);
+}
+
+.right {
+  color: var(--right);
+}
+
+.status {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-open {
+  color: var(--hit);
+  border-color: var(--hit);
+}
+
+.status-stalled {
+  color: var(--right);
+  border-color: var(--right);
+}
+
+.status-closed {
+  color: var(--wrong);
+  border-color: var(--wrong);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.grow {
+  flex: 1 1 380px;
+}
+
+.indicator {
+  flex: 1 1 380px;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+}
+
+.arena {
+  height: 210px;
+}
+
+.eeg {
+  height: 220px;
+}
+
+.prob-labels {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 6px;
+}
+
+.prob-bar {
+  position: relative;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.prob-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  background: var(--rest);
+  transition:
+    left 0.2s linear,
+    width 0.2s linear,
+    background-color 0.2s linear;
+}
+
+.prob-centre {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+}
+
+.prob-threshold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px dashed var(--muted);
+  display: none;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.tile {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tile-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tile-value {
+  font-size: 19px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.verdict {
+  margin: 10px 0 0;
+  font-weight: 600;
+}
+
+.verdict-good {
+  color: var(--hit);
+}
+
+.verdict-bad {
+  color: var(--wrong);
+}
+
+.verdict-neutral {
+  color: var(--muted);
+}
+
+.stats .stat {
+  flex: 1 1 200px;
+}
+
+.big {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+footer {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+footer p {
+  margin: 0 0 6px;
+}
+
+button {
+  margin-left: 8px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--muted);
+}

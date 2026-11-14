@@ -1,0 +1,143 @@
+{
+ "version": "0.1.0",
+ "candidate": "cross/eegnet/causal",
+ "rule": "travel time (centre to wall at full confidence) from a fixed grid that maximises hits minus wrong-side hits on the demo subject's training runs; ties go to the slower cursor",
+ "grid_s": [
+  0.5,
+  0.75,
+  1.0,
+  1.25,
+  1.5,
+  1.75,
+  2.0,
+  2.5,
+  3.0
+ ],
+ "demo_subject": 7,
+ "train_runs": [
+  4,
+  8
+ ],
+ "test_run": 12,
+ "threshold": 0.688223272562027,
+ "step_s": 0.25,
+ "selection_table": {
+  "0.5": {
+   "trials": 30,
+   "hits": 16,
+   "wrong": 6,
+   "timeouts": 8,
+   "hit_rate": 0.5333333333333333,
+   "wrong_rate": 0.2,
+   "timeout_rate": 0.26666666666666666,
+   "median_hit_time_s": 1.223197966775749,
+   "net": 10
+  },
+  "0.75": {
+   "trials": 30,
+   "hits": 15,
+   "wrong": 3,
+   "timeouts": 12,
+   "hit_rate": 0.5,
+   "wrong_rate": 0.1,
+   "timeout_rate": 0.4,
+   "median_hit_time_s": 1.763383870974194,
+   "net": 12
+  },
+  "1": {
+   "trials": 30,
+   "hits": 14,
+   "wrong": 2,
+   "timeouts": 14,
+   "hit_rate": 0.4666666666666667,
+   "wrong_rate": 0.06666666666666667,
+   "timeout_rate": 0.4666666666666667,
+   "median_hit_time_s": 1.9285374065539034,
+   "net": 12
+  },
+  "1.25": {
+   "trials": 30,
+   "hits": 12,
+   "wrong": 1,
+   "timeouts": 17,
+   "hit_rate": 0.4,
+   "wrong_rate": 0.03333333333333333,
+   "timeout_rate": 0.5666666666666667,
+   "median_hit_time_s": 2.29097748051898,
+   "net": 11
+  },
+  "1.5": {
+   "trials": 30,
+   "hits": 11,
+   "wrong": 0,
+   "timeouts": 19,
+   "hit_rate": 0.36666666666666664,
+   "wrong_rate": 0.0,
+   "timeout_rate": 0.6333333333333333,
+   "median_hit_time_s": 2.562023386085839,
+   "net": 11
+  },
+  "1.75": {
+   "trials": 30,
+   "hits": 9,
+   "wrong": 0,
+   "timeouts": 21,
+   "hit_rate": 0.3,
+   "wrong_rate": 0.0,
+   "timeout_rate": 0.7,
+   "median_hit_time_s": 2.400656486545685,
+   "net": 9
+  },
+  "2": {
+   "trials": 30,
+   "hits": 8,
+   "wrong": 0,
+   "timeouts": 22,
+   "hit_rate": 0.26666666666666666,
+   "wrong_rate": 0.0,
+   "timeout_rate": 0.7333333333333333,
+   "median_hit_time_s": 2.7232829225414843,
+   "net": 8
+  },
+  "2.5": {
+   "trials": 30,
+   "hits": 5,
+   "wrong": 0,
+   "timeouts": 25,
+   "hit_rate": 0.16666666666666666,
+   "wrong_rate": 0.0,
+   "timeout_rate": 0.8333333333333334,
+   "median_hit_time_s": 3.2316213786063805,
+   "net": 5
+  },
+  "3": {
+   "trials": 30,
+   "hits": 4,
+   "wrong": 0,
+   "timeouts": 26,
+   "hit_rate": 0.13333333333333333,
+   "wrong_rate": 0.0,
+   "timeout_rate": 0.8666666666666667,
+   "median_hit_time_s": 4.012679894625877,
+   "net": 4
+  }
+ },
+ "travel_time_s": 1.0,
+ "demo_test_run": {
+  "trials": 15,
+  "hits": 12,
+  "wrong": 0,
+  "timeouts": 3,
+  "hit_rate": 0.8,
+  "wrong_rate": 0.0,
+  "timeout_rate": 0.2,
+  "median_hit_time_s": 3.2665671010443695
+ },
+ "all_subjects": {
+  "n_subjects": 105,
+  "hit_rate_mean": 0.19576719576719576,
+  "wrong_rate_mean": 0.07047619047619048,
+  "timeout_rate_mean": 0.7337566137566138,
+  "subjects_hit_rate_above_70": 0
+ }
+}

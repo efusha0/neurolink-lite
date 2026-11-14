@@ -146,3 +146,31 @@ and the "not already right" rows leave those trials out.
 | S007, run 12 | right class, threshold ignored | 15 | 100.0 | 0.35 | 0.17 | 0.35 | 1.17 | 1.69 | 66.7 | 100.0 | 100.0 |
 
 First above-threshold output of a trial, all subjects: right class in 34.5 % of trials, wrong class in 20.3 %, none at all in 45.2 %.
+
+## Target game
+
+The UI game simulated on the pseudo-online outputs: the cursor starts at the centre
+at every cue, a target sits at the cued wall, and the cursor moves with velocity
+(p_right - p_left) / travel time while the prediction is above the threshold.
+Rule for the travel time: travel time (centre to wall at full confidence) from a fixed grid that maximises hits minus wrong-side hits on the demo subject's training runs; ties go to the slower cursor.
+
+| Travel time (s) | Hits, S007 runs 4+8 | Wrong side | Timeouts | Hits - wrong |
+|---:|---:|---:|---:|---:|
+| 0.5 | 16/30 | 6 | 8 | 10 |
+| 0.75 | 15/30 | 3 | 12 | 12 |
+| 1 **(selected)** | 14/30 | 2 | 14 | 12 |
+| 1.25 | 12/30 | 1 | 17 | 11 |
+| 1.5 | 11/30 | 0 | 19 | 11 |
+| 1.75 | 9/30 | 0 | 21 | 9 |
+| 2 | 8/30 | 0 | 22 | 8 |
+| 2.5 | 5/30 | 0 | 25 | 5 |
+| 3 | 4/30 | 0 | 26 | 4 |
+
+With 1 s, on data that played no part in the choice:
+
+| Data | Trials | Hits (%) | Wrong side (%) | Timeouts (%) | Median time to hit (s) |
+|---|---:|---:|---:|---:|---:|
+| S007, run 12 (the demo) | 15 | 80.0 | 0.0 | 20.0 | 3.27 |
+| Mean of 105 subjects, all runs | - | 19.6 | 7.0 | 73.4 | - |
+
+0/105 subjects hit at least 70 % of their targets.
