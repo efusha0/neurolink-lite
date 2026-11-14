@@ -1,6 +1,10 @@
-# Data (never committed)
+# Data (never committed). The one exception is the small demo model (weights only,
+# no EEG), so that `neurolink demo` works without training.
 data/*
 !data/.gitkeep
+!data/models/
+data/models/*
+!data/models/demo_model.pt
 
 # Python
 __pycache__/
