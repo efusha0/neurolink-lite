@@ -187,3 +187,14 @@ decisions that are not obvious from the code.
   on 86.5 % of all trial windows; the pseudo-online evaluation of the same run gives
   87.0 %. The two differ in where the 0.25 s window grid starts and in the last
   seconds of the 125 s run, which the 120 s session does not reach.
+- **Behavioural latency is reported separately from computation latency.** Measured by
+  `neurolink behavioural-latency` on the stored pseudo-online outputs of the demo model
+  candidate: time from each trial onset to the end of the first window whose smoothed
+  prediction is the trial's class and above the threshold. S007 on run 12: median
+  1.65 s (p25-p75 1.30-2.12 s) over the 11 of 12 trials that reach it. All subjects:
+  reached in 25.9 % of trials, median 1.80 s when reached.
+  Both exclude trials whose last window before the cue already showed the coming class
+  above the threshold (18.5 % of all trials). Taken literally, the definition counts those
+  as near-instant reactions and yields a median of 0.45 s over all subjects, which
+  measures carry-over from rest rather than reaction. Both variants are in
+  `results/RESULTS.md`; the README leads with the corrected one and shows both.

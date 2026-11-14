@@ -2,7 +2,7 @@
 
 > **Status:** work in progress. Data pipeline, CSP+LDA baseline, EEGNet and the real-time
 > system (LSL replay, online classifier, WebSocket server) are done (Phases 0-4); the
-> browser UI and the one-command demo are next.
+> browser UI (Phase 5) and the one-command demo (Phase 6) are next.
 
 NeuroLink-lite is a small, honest, open-source brain-computer interface (BCI) project.
 It classifies EEG recorded while a person *imagines* moving their left or right hand, and
@@ -185,6 +185,46 @@ chunks, 250 ms step). When it does not, the prediction additionally waits for th
 complete: with 200 ms chunks the same measurement gives p50 54 ms and p95 165 ms end to
 end (225 predictions over 60 s).
 
+### Behavioural latency: what the user actually feels
+
+The 9-15 ms above are **computation latency only**: how long the pipeline needs to turn
+a new sample into a prediction. The delay a user would feel is far longer, because the
+decoder looks at the last 2 s and smooths its output (the EMA with alpha = 0.3 has a time
+constant of about 0.7 s). After a cue, the window first has to fill with imagery data.
+
+This behavioural latency is measured on the pseudo-online outputs (the same held-out data
+as above): for each left/right trial (4.1 s long), the time from the trial onset to the
+end of the first window whose smoothed prediction is the trial's class **and** above the
+confidence threshold, i.e. until the cursor starts moving the right way.
+
+| Data | Trials | Reached before the trial ends | Median | p25-p75 | p90 | Within 1 s | Within 2 s |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| S007, run 12 (the demo): trials that need a change of output | 12 | 11 (91.7 %) | 1.65 s | 1.30-2.12 s | 2.35 s | 0.0 % | 66.7 % |
+| S007, run 12: all trials | 15 | 14 (93.3 %) | 1.52 s | 1.10-1.93 s | 2.32 s | 20.0 % | 73.3 % |
+| S007, all three runs: trials that need a change of output | 33 | 26 (78.8 %) | 1.65 s | 1.16-2.46 s | 3.02 s | 12.1 % | 51.5 % |
+| All 105 subjects: trials that need a change of output | 3853 | 999 (25.9 %) | 1.80 s | 0.80-2.70 s | 3.50 s | 7.9 % | 14.7 % |
+| All 105 subjects: all trials | 4725 | 1836 (38.9 %) | 0.45 s | 0.15-2.00 s | 3.02 s | 23.5 % | 29.2 % |
+
+Median, quartiles and p90 are over the trials in which the condition is reached; "within"
+is the share of all trials of the row.
+
+- **Demo subject: about 1.65 s.** For S007 on run 12 the cursor starts moving the right way a
+  median of 1.65 s after the cue, never within the first second, and in one of
+  12 trials not at all. That is roughly 180 times the computation latency. Only
+  12 trials stand behind this number.
+- **"Trials that need a change of output" is the meaningful row.** In 18.5 % of all
+  trials (3 of 15 for S007 on run 12) the last window *before* the cue already showed
+  the coming class above the threshold. Those trials "react" within a fraction of a
+  second, but that is carry-over from what the decoder happened to output during rest
+  (the Midas touch again), not a reaction. Counting them makes the all-subject median
+  look fast (0.45 s) while 20 % of all trials are "right" within 0.5 s, when the
+  window still holds at least 1.5 s of rest.
+- **For the average subject the question is mostly "whether", not "when".** Across all
+  subjects only 26 % of the trials that need a change ever get the cursor moving the
+  right way before the trial ends (median 1.80 s when they do). The first above-threshold
+  output of a trial is the right class in 34.5 % of trials, the wrong class in
+  20.3 %, and there is none in 45.2 %.
+
 ## How to run
 
 ```bash
@@ -211,6 +251,7 @@ uv run neurolink train-demo                   # trains and saves data/models/dem
 uv run neurolink stream                       # terminal 1: replay the demo run over LSL
 uv run neurolink serve                        # terminal 2: classifier + WebSocket server
 uv run neurolink latency                      # end-to-end latency measurement
+uv run neurolink behavioural-latency          # reaction to the cue, from pseudo-online outputs
 ```
 
 `pseudo-online` trains every candidate model and takes a while on a CPU; its results are
@@ -263,6 +304,9 @@ Points already known and to be covered there:
 - The demo model was the best of eight candidates on the same held-out data, so its own
   pseudo-online number is slightly optimistic (selection among candidates).
 - Latency excludes browser rendering and was measured on one machine with replayed data.
+  It is computation latency only: the behavioural latency (cue to the cursor moving the
+  right way) is about 1.65 s for the demo subject, and for the average subject the
+  cursor mostly never gets there within a trial.
 - Large inter-subject variability ("BCI illiteracy"); the demo subject (S007) is a best
   case and the average is reported next to it.
 
