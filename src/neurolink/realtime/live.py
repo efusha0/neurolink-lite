@@ -10,6 +10,7 @@ import socket
 import threading
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -69,11 +70,13 @@ def build_live(
     timeout: float = 10.0,
     marker_timeout: float = 3.0,
     extra_info: dict[str, Any] | None = None,
+    static_dir: Path | None = None,
 ) -> LiveSystem:
     """Resolve the LSL streams and build the FastAPI app around a decode worker.
 
     Raises ``TimeoutError`` if the EEG stream is not there. The marker stream is optional:
-    without it the ``true`` field of the prediction messages is ``null``.
+    without it the ``true`` field of the prediction messages is ``null``. ``static_dir``
+    is the built browser UI, served from ``/`` if given.
     """
     import pylsl
 
@@ -106,7 +109,8 @@ def build_live(
         "display_rate_hz": reader.sfreq / DISPLAY_DECIMATION,
         **(extra_info or {}),
     }
-    return LiveSystem(create_app(hub, start, info=info), hub, reader, markers)
+    app = create_app(hub, start, info=info, static_dir=static_dir)
+    return LiveSystem(app, hub, reader, markers)
 
 
 def _free_port() -> int:

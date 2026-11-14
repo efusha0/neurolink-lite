@@ -15,10 +15,12 @@ import logging
 import threading
 import time
 from collections.abc import AsyncIterator, Callable, Sequence
+from pathlib import Path
 from typing import Any, Protocol
 
 import numpy as np
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.staticfiles import StaticFiles
 from numpy.typing import NDArray
 
 from neurolink.config import CLASS_NAMES
@@ -201,8 +203,13 @@ def create_app(
     hub: Hub,
     start_worker: Callable[[Emit], DecodeWorker | None] | None = None,
     info: dict[str, Any] | None = None,
+    static_dir: Path | None = None,
 ) -> FastAPI:
-    """Build the app. ``start_worker(emit)`` is called on startup and stopped on shutdown."""
+    """Build the app. ``start_worker(emit)`` is called on startup and stopped on shutdown.
+
+    With ``static_dir`` (the built browser UI) the page is served from ``/`` on the same
+    port as the WebSocket and the JSON endpoints.
+    """
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -252,4 +259,7 @@ def create_app(
         finally:
             hub.clients.discard(ws)
 
+    if static_dir is not None:
+        # Mounted last: the routes above win, everything else is a file of the UI.
+        app.mount("/", StaticFiles(directory=static_dir, html=True), name="ui")
     return app

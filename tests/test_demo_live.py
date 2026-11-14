@@ -91,16 +91,13 @@ def test_session_stats_on_a_hand_made_session() -> None:
 
 
 # --------------------------------------------------------------------------------- CLI
-def test_demo_is_still_a_stub() -> None:
-    assert runner.invoke(app, ["demo"]).exit_code == 2
-
-
 def test_commands_fail_cleanly_without_a_model_or_selection(tmp_path: Path) -> None:
     missing = str(tmp_path / "missing.pt")
     empty = str(tmp_path)
     for args in (
         ["serve", "--model-path", missing],
         ["latency", "--model-path", missing],
+        ["demo", "--model-path", missing],
         ["stream", "--results-dir", empty],
         ["train-demo", "--results-dir", empty],
         ["pseudo-online", "--resummarize", "--results-dir", empty, "--cache-dir", empty],

@@ -1,7 +1,4 @@
-"""Command-line entry point: ``uv run neurolink <command>``.
-
-``demo`` is a stub until Phase 6.
-"""
+"""Command-line entry point: ``uv run neurolink <command>``."""
 
 from __future__ import annotations
 
@@ -31,11 +28,6 @@ app = typer.Typer(
 )
 
 
-def _not_implemented(phase: str) -> None:
-    typer.echo(f"Not implemented yet (planned for {phase}).")
-    raise typer.Exit(code=2)
-
-
 def _setup_logging(verbose: bool) -> None:
     import mne
 
@@ -45,6 +37,27 @@ def _setup_logging(verbose: bool) -> None:
     )
     # MNE's CSP logs every covariance estimate; keep only warnings unless --verbose.
     mne.set_log_level("INFO" if verbose else "WARNING")
+    if not verbose:
+        _quiet_liblsl()
+
+
+def _quiet_liblsl() -> None:
+    """liblsl lists every network interface on stderr when it loads; keep warnings only.
+
+    Its log level can only be set through a config file named by ``LSLAPICFG``, read when
+    the library is first used. A config the user already set is left alone.
+    """
+    import os
+    import tempfile
+
+    if "LSLAPICFG" in os.environ:
+        return
+    config = Path(tempfile.gettempdir()) / "neurolink_lsl_api.cfg"
+    try:
+        config.write_text("[log]\nlevel = -1\n", encoding="utf-8")
+    except OSError:
+        return  # cosmetic only
+    os.environ["LSLAPICFG"] = str(config)
 
 
 def _subjects_option(value: str) -> tuple[int, ...]:
@@ -490,24 +503,31 @@ def serve(
     results_dir: Path = typer.Option(RESULTS_DIR),
     verbose: bool = typer.Option(False, "--verbose", "-v"),
 ) -> None:
-    """Run the online classifier on the LSL stream and serve predictions over WebSocket."""
+    """Run the online classifier on the LSL stream and serve predictions over WebSocket.
+
+    If the browser UI has been built (``neurolink demo`` or ``npm run build``), it is
+    served from the same port.
+    """
     import uvicorn
 
     from neurolink.eval.report import ui_info
+    from neurolink.realtime.demo import built_ui
     from neurolink.realtime.demo_model import DEMO_CANDIDATE
     from neurolink.realtime.live import build_live
 
     _setup_logging(verbose)
     bundle = _load_bundle(model_path)
     extra_info = ui_info(results_dir, str(bundle.meta.get("candidate", DEMO_CANDIDATE)))
+    static_dir = built_ui()
     try:
-        live = build_live(bundle, timeout=timeout, extra_info=extra_info)
+        live = build_live(bundle, timeout=timeout, extra_info=extra_info, static_dir=static_dir)
     except (TimeoutError, ValueError) as exc:
         typer.secho(f"{exc}. Start `neurolink stream` first.", err=True, fg=typer.colors.RED)
         raise typer.Exit(code=1) from exc
     typer.echo(
         f"model: {bundle.meta.get('candidate', '?')}, threshold {bundle.threshold:.3f}; "
         f"predictions on ws://{host}:{port}/ws"
+        + (f"; UI on http://{host}:{port}/" if static_dir else "")
     )
     try:
         uvicorn.run(live.app, host=host, port=port, log_level="info" if verbose else "warning")
@@ -654,10 +674,89 @@ def game_speed(
     typer.echo(f"wrote {save_realtime(GAME_JSON, result, results_dir)}")
 
 
+def _fail(message: str) -> typer.Exit:
+    typer.secho(message, err=True, fg=typer.colors.RED)
+    return typer.Exit(code=1)
+
+
 @app.command()
-def demo() -> None:
-    """One-command demo: streamer + classifier + server + browser UI (Phase 6)."""
-    _not_implemented("Phase 6")
+def demo(
+    subject: int = typer.Option(0, help="Subject to replay. 0 = the demo subject."),
+    run: int = typer.Option(12, help="Run to replay (12 is the held-out run)."),
+    host: str = typer.Option("127.0.0.1"),
+    port: int = typer.Option(8000),
+    open_browser: bool = typer.Option(True, "--open/--no-open", help="Open the page."),
+    rebuild_ui: bool = typer.Option(False, "--rebuild-ui", help="Build the UI even if it exists."),
+    duration: float = typer.Option(0.0, help="Stop after this many seconds (0 = until Ctrl+C)."),
+    model_path: Path = typer.Option(None, help="Demo model (default data/models/demo_model.pt)."),
+    raw_dir: Path = typer.Option(RAW_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """One command: replay the demo run, classify it live and open the browser UI.
+
+    Uses the model shipped in data/models/demo_model.pt, downloads the one recording it
+    replays (about 2.6 MB from PhysioNet) and builds the UI on the first run (needs Node.js).
+    """
+    import webbrowser
+
+    from neurolink.eval.report import ui_info
+    from neurolink.realtime.demo import DemoSetupError, ensure_ui, run_demo
+    from neurolink.realtime.demo_model import DEMO_CANDIDATE, DEMO_MODEL_PATH
+
+    _setup_logging(verbose)
+    path = model_path or DEMO_MODEL_PATH
+    if not path.exists():
+        raise _fail(
+            f"The demo model {path} was not found. It ships with the repository; to train "
+            "it yourself run:\n"
+            "  uv run neurolink download --subjects all   # about 0.8 GB\n"
+            "  uv run neurolink train-demo"
+        )
+    bundle = _load_bundle(path)
+    if subject == 0:  # the subject the shipped model was built for and has never seen
+        subject = int(bundle.meta.get("demo_subject", 0)) or _demo_subject(results_dir)
+    name = f"S{subject:03d} run {run}"
+    typer.echo(
+        f"[1/3] model: {bundle.meta.get('candidate', '?')}, trained on "
+        f"{bundle.meta.get('n_train_subjects', '?')} other subjects, has never seen S{subject:03d}"
+    )
+
+    if not any(raw_dir.rglob(f"S{subject:03d}R{run:02d}.edf")):
+        typer.echo(f"[2/3] recording: downloading {name} from PhysioNet (about 2.6 MB) ...")
+    try:
+        recording = _load_recording(subject, run, raw_dir)
+    except typer.Exit:
+        raise
+    except Exception as exc:
+        raise _fail(
+            f"Could not get {name}: {exc}\nThe file is downloaded from PhysioNet "
+            "(https://physionet.org/content/eegmmidb/1.0.0/); check the internet connection "
+            "and run the command again."
+        ) from exc
+    seconds = len(recording.data) / recording.sfreq
+    typer.echo(f"[2/3] recording: {name}, {seconds:.0f} s, replayed in a loop")
+
+    def ready(url: str) -> None:
+        typer.echo(f"\nNeuroLink-lite is running: {url}   (Ctrl+C to stop)")
+        if open_browser:
+            webbrowser.open(url)
+
+    try:
+        static_dir = ensure_ui(
+            rebuild=rebuild_ui, echo=lambda line: typer.echo(f"[3/3] UI: {line}")
+        )
+        typer.echo(f"[3/3] UI: {static_dir}")
+        extra_info = ui_info(results_dir, str(bundle.meta.get("candidate", DEMO_CANDIDATE)))
+        stats = run_demo(
+            bundle, recording, static_dir, host=host, port=port, extra_info=extra_info,
+            on_ready=ready, duration_s=duration if duration > 0 else None,
+        )  # fmt: skip
+    except DemoSetupError as exc:
+        raise _fail(f"Cannot start the demo: {exc}") from exc
+    except (TimeoutError, ValueError) as exc:
+        raise _fail(f"Cannot start the demo: {exc}") from exc
+    typer.echo(f"stopped after {stats['passes']} pass(es), {stats['samples_sent']} samples")
 
 
 if __name__ == "__main__":
