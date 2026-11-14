@@ -20,9 +20,15 @@ def test_version_command() -> None:
 
 
 def test_stub_commands_exit_with_code_2() -> None:
-    for cmd in ["stream", "serve", "demo"]:
+    for cmd in ["demo"]:
         result = runner.invoke(app, [cmd])
         assert result.exit_code == 2, cmd
+
+
+def test_realtime_commands_are_registered() -> None:
+    for cmd in ["stream", "serve", "latency", "train-demo", "pseudo-online"]:
+        result = runner.invoke(app, [cmd, "--help"])
+        assert result.exit_code == 0, cmd
 
 
 def test_config_defaults() -> None:

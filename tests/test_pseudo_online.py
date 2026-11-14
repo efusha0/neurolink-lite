@@ -15,6 +15,7 @@ from neurolink.eval.online_eval import resummarize, run_experiment, summarize
 from neurolink.eval.report import _nan_to_none, save_pseudo_online
 from neurolink.models.base import Classifier
 from neurolink.models.csp_lda import make_csp_lda
+from neurolink.realtime.demo_model import train_demo_model
 from neurolink.realtime.pseudo_online import (
     OUTSIDE,
     REST,
@@ -304,3 +305,45 @@ def test_resummarize_reproduces_the_summary_from_saved_files(experiment, tmp_pat
     del saved["fold_of"]
     saved["config"]["seed"] = 0
     assert resummarize(saved, store.arrays())["fold_of"] == summary["fold_of"]
+
+
+# -------------------------------------------------------------------------- demo model
+def test_demo_model_is_the_evaluated_fold_model_and_never_sees_its_subject(experiment) -> None:  # type: ignore[no-untyped-def]
+    summary, _store = experiment
+    cfg = PreprocessConfig(channels=MOTOR_CORTEX_CHANNELS, subjects=(1, 2, 3, 4), causal=True)
+    dataset, _ = build_dataset(cfg, subject_loader=fake_subject_loader)
+    seen: list[int] = []
+
+    def loader(subject: int) -> list[Recording]:
+        seen.append(subject)
+        return fake_recordings(subject)
+
+    demo_subject = 3
+    bundle = train_demo_model(
+        demo_subject, seed=0, n_splits=2, dataset=dataset,
+        recording_loader=loader, maker=make_csp_lda,
+    )  # fmt: skip
+    fold = summary["fold_of"][str(demo_subject)]
+    assert bundle.meta["fold"] == fold and bundle.meta["demo_subject"] == demo_subject
+    # Neither the weights nor the threshold may depend on the demo subject's data.
+    assert demo_subject not in bundle.meta["train_subjects"]
+    assert sorted(seen) == bundle.meta["train_subjects"] and len(seen) == 2
+    # Same model and threshold as the pseudo-online experiment reported for that fold.
+    key = "cross/csp_lda/causal"
+    assert bundle.threshold == pytest.approx(summary["thresholds"][key][fold])
+    row = summary["rows"][key]["per_subject"][str(demo_subject)]
+    assert bundle.meta["demo_subject_offline_acc"] == pytest.approx(row["offline_acc"])
+    assert bundle.ch_names == tuple(MOTOR_CORTEX_CHANNELS) and bundle.car
+
+
+def test_demo_model_rejects_zero_phase_data_and_unknown_subjects() -> None:
+    cfg = PreprocessConfig(channels=MOTOR_CORTEX_CHANNELS, subjects=(1, 2))
+    zero_phase, _ = build_dataset(cfg, subject_loader=fake_subject_loader)
+    with pytest.raises(ValueError, match="causally filtered"):
+        train_demo_model(1, seed=0, n_splits=2, dataset=zero_phase, maker=make_csp_lda)
+    causal, _ = build_dataset(
+        PreprocessConfig(channels=MOTOR_CORTEX_CHANNELS, subjects=(1, 2), causal=True),
+        subject_loader=fake_subject_loader,
+    )
+    with pytest.raises(ValueError, match="not a valid subject"):
+        train_demo_model(9, seed=0, n_splits=2, dataset=causal, maker=make_csp_lda)

@@ -132,6 +132,7 @@ def write_markdown_table(results_dir: Path = RESULTS_DIR) -> Path:
             "",
         ]
     lines += pseudo_online_markdown(results_dir)
+    lines += realtime_markdown(results_dir)
     path = results_dir / RESULTS_MD
     path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return path
@@ -210,4 +211,118 @@ def pseudo_online_markdown(results_dir: Path = RESULTS_DIR) -> list[str]:
             f"{_pct(row['imagery_active_rate'])} | {_pct(row['acc_when_active'])} |"
         )
     lines.append("")
+    return lines
+
+
+REALTIME_DIR = "realtime"
+DEMO_MODEL_JSON = "demo_model.json"
+LATENCY_JSON = "latency.json"
+
+
+def save_realtime(name: str, payload: dict[str, Any], results_dir: Path = RESULTS_DIR) -> Path:
+    """Write ``results/realtime/<name>`` (demo model, latency) and refresh ``RESULTS.md``."""
+    path = results_dir / REALTIME_DIR / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    body = {"version": __version__, **_nan_to_none(payload)}
+    path.write_text(json.dumps(body, indent=1) + "\n", encoding="utf-8", newline="\n")
+    write_markdown_table(results_dir)
+    return path
+
+
+def load_realtime(name: str, results_dir: Path = RESULTS_DIR) -> dict[str, Any] | None:
+    path = results_dir / REALTIME_DIR / name
+    if not path.exists():
+        return None
+    data: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
+    return data
+
+
+def _pct1(value: float | None) -> str:
+    return "-" if value is None else f"{100 * value:.1f}"
+
+
+def realtime_markdown(results_dir: Path = RESULTS_DIR) -> list[str]:
+    """Markdown sections for the demo model and the latency measurements, if present."""
+    lines: list[str] = []
+    demo = load_realtime(DEMO_MODEL_JSON, results_dir)
+    if demo is not None:
+        subject = f"S{demo['demo_subject']:03d}"
+        lines += [
+            "## Demo model",
+            "",
+            f"`{demo['candidate']}`, the fold model that holds {subject} out: trained on"
+            f" {demo['n_train_subjects']} other subjects ({demo['n_train_epochs']} epochs),"
+            f" confidence threshold {demo['threshold']:.3f} from their rest windows.",
+        ]
+        selection = demo.get("selection")
+        if selection is not None:
+            ties = ""
+            if len(selection.get("tied_subjects", [])) > 1:
+                scores = ", ".join(
+                    f"S{int(s):03d} {100 * v:.1f} %"
+                    for s, v in selection["tie_break_scores"].items()
+                )
+                ties = f" Tie-break among equal scores: {scores}."
+            lines += [
+                f"Demo subject rule: {selection['selection_rule']}."
+                f" Selection score {100 * selection['selection_score']:.1f} %.{ties}",
+                "Run 12 was not used to select the model or the subject.",
+            ]
+        rows = [
+            (f"{subject}, run 12 (replayed in the demo)", demo.get("pseudo_online_run12")),
+            (f"{subject}, all three runs", demo.get("pseudo_online_all_runs")),
+        ]
+        if any(row is not None for _name, row in rows):
+            lines += [
+                "",
+                "| Data | Offline | Inside, smoothed | All, smoothed | Rest active "
+                "| Trial active | Acc. active |",
+                "|---|---:|---:|---:|---:|---:|---:|",
+            ]
+            for name, row in rows:
+                if row is None:
+                    continue
+                lines.append(
+                    f"| {name} | {_pct1(row['offline_acc'])} | {_pct1(row['acc_inside_smooth'])} "
+                    f"| {_pct1(row['acc_all_smooth'])} | {_pct1(row['rest_active_rate'])} "
+                    f"| {_pct1(row['imagery_active_rate'])} | {_pct1(row['acc_when_active'])} |"
+                )
+            lines += [
+                "",
+                "This subject is a best case; the average over all subjects is the"
+                f" `{demo['candidate']}` row of the pseudo-online table above.",
+            ]
+        lines.append("")
+
+    latency_files = sorted((results_dir / REALTIME_DIR).glob("latency*.json"))
+    if latency_files:
+        lines += [
+            "## Latency",
+            "",
+            "Time from the acquisition (LSL timestamp) of the newest sample of a window to:",
+            "the smoothed prediction (`stream_to_pred`), the hand-over to the WebSocket",
+            "(`pred_to_ws`, measured from the prediction) and the arrival at a WebSocket",
+            "client on the same machine (`end_to_end`). Browser rendering is not included.",
+            "The 2 s analysis window is not part of these numbers.",
+            "",
+            "| Measurement | Stage | Predictions | Mean (ms) | p50 (ms) | p95 (ms) | p99 (ms) "
+            "| Max (ms) |",
+            "|---|---|---:|---:|---:|---:|---:|---:|",
+        ]
+        for path in latency_files:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            name = (
+                f"S{data['subject']:03d} run {data['run']}, {data['duration_s']:g} s,"
+                f" {data['chunk_ms']:g} ms chunks"
+            )
+            for stage in ("stream_to_pred", "pred_to_ws", "end_to_end"):
+                row = data["stages_ms"].get(stage)
+                if row is None:
+                    continue
+                cells = " | ".join(
+                    "-" if row[k] is None else f"{row[k]:.1f}"
+                    for k in ("mean_ms", "p50_ms", "p95_ms", "p99_ms", "max_ms")
+                )
+                lines.append(f"| {name} | {stage} | {row['n']:.0f} | {cells} |")
+        lines.append("")
     return lines

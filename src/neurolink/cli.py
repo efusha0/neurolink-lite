@@ -1,6 +1,6 @@
 """Command-line entry point: ``uv run neurolink <command>``.
 
-Commands are stubs until their phase is implemented.
+``demo`` is a stub until Phase 6.
 """
 
 from __future__ import annotations
@@ -321,16 +321,225 @@ def pseudo_online(
         )
 
 
-@app.command()
-def stream() -> None:
-    """Replay recorded EEG over LSL in real time (Phase 4)."""
-    _not_implemented("Phase 4")
+@app.command(name="train-demo")
+def train_demo(
+    subject: int = typer.Option(
+        0, help="Demo subject. 0 = the subject selected by `neurolink pseudo-online`."
+    ),
+    epochs: int = typer.Option(30, help="EEGNet epochs (as in the cross-subject protocol)."),
+    n_splits: int = typer.Option(5, help="Subject-grouped folds."),
+    threads: int = typer.Option(4, help="Torch CPU threads."),
+    seed: int = typer.Option(SEED),
+    raw_dir: Path = typer.Option(RAW_DIR),
+    cache_dir: Path = typer.Option(CACHE_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+    model_path: Path = typer.Option(None, help="Output file (default data/models/demo_model.pt)."),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """Train and save the demo model: cross-subject EEGNet that never saw the demo subject."""
+    import json
+
+    from neurolink.eval.report import (
+        DEMO_MODEL_JSON,
+        PSEUDO_ONLINE_DIR,
+        PSEUDO_ONLINE_JSON,
+        save_realtime,
+    )
+    from neurolink.realtime import demo_model as dm
+    from neurolink.utils.seed import set_seed
+
+    _setup_logging(verbose)
+    set_seed(seed)
+    experiment_path = results_dir / PSEUDO_ONLINE_DIR / PSEUDO_ONLINE_JSON
+    experiment = (
+        json.loads(experiment_path.read_text(encoding="utf-8")) if experiment_path.exists() else {}
+    )
+    selection = experiment.get("demo_selection", {}).get(dm.DEMO_CANDIDATE)
+    if subject == 0:
+        if selection is None:
+            typer.secho(
+                "No demo subject selected yet: run `neurolink pseudo-online` or pass --subject.",
+                err=True,
+                fg=typer.colors.RED,
+            )
+            raise typer.Exit(code=1)
+        subject = int(selection["subject"])
+    typer.echo(f"demo subject: S{subject:03d}")
+    bundle = dm.train_demo_model(
+        subject, seed, n_splits=n_splits, epochs=epochs, threads=threads,
+        cache_dir=cache_dir, raw_dir=raw_dir,
+    )  # fmt: skip
+    path = dm.save_bundle(bundle, model_path or dm.DEMO_MODEL_PATH)
+    typer.echo(f"wrote {path} (threshold {bundle.threshold:.4f})")
+
+    payload: dict[str, Any] = dm.public_meta(bundle)
+    if selection is not None and int(selection["subject"]) == subject:
+        # The experiment trained the same fold model; equal numbers show the demo runs the
+        # model that was evaluated, not a retuned one.
+        row = experiment["rows"][dm.DEMO_CANDIDATE]["per_subject"][str(subject)]
+        fold_threshold = experiment["thresholds"][dm.DEMO_CANDIDATE][bundle.meta["fold"]]
+        same = bool(
+            np.isclose(fold_threshold, bundle.threshold, atol=1e-5)
+            and np.isclose(row["offline_acc"], bundle.meta["demo_subject_offline_acc"])
+        )
+        payload["selection"] = {
+            k: selection[k]
+            for k in ("selection_rule", "selection_score", "tied_subjects", "tie_break_scores")
+            if k in selection
+        }
+        payload["pseudo_online_run12"] = selection["run12_result"]
+        payload["pseudo_online_all_runs"] = row
+        payload["experiment_threshold"] = fold_threshold
+        payload["matches_pseudo_online_experiment"] = same
+        typer.echo(
+            f"experiment threshold {fold_threshold:.4f}, offline acc {row['offline_acc']:.3f} "
+            f"vs {bundle.meta['demo_subject_offline_acc']:.3f}: "
+            + ("matches the evaluated model" if same else "DIFFERS from the evaluated model")
+        )
+    typer.echo(f"wrote {save_realtime(DEMO_MODEL_JSON, payload, results_dir)}")
+
+
+def _demo_subject(results_dir: Path) -> int:
+    """Demo subject recorded by `train-demo`, else the one selected by `pseudo-online`."""
+    import json
+
+    from neurolink.eval.report import (
+        DEMO_MODEL_JSON,
+        PSEUDO_ONLINE_DIR,
+        PSEUDO_ONLINE_JSON,
+        load_realtime,
+    )
+    from neurolink.realtime.demo_model import DEMO_CANDIDATE
+
+    trained = load_realtime(DEMO_MODEL_JSON, results_dir)
+    if trained is not None:
+        return int(trained["demo_subject"])
+    path = results_dir / PSEUDO_ONLINE_DIR / PSEUDO_ONLINE_JSON
+    if path.exists():
+        selection = json.loads(path.read_text(encoding="utf-8"))["demo_selection"]
+        if DEMO_CANDIDATE in selection:
+            return int(selection[DEMO_CANDIDATE]["subject"])
+    typer.secho(
+        "No demo subject known: pass --subject or run `neurolink train-demo`.",
+        err=True,
+        fg=typer.colors.RED,
+    )
+    raise typer.Exit(code=1)
+
+
+def _load_recording(subject: int, run: int, raw_dir: Path) -> Any:
+    from neurolink.realtime.pseudo_online import load_recordings
+
+    recordings = load_recordings(subject, (run,), raw_dir)
+    if recordings is None:
+        typer.secho(
+            f"S{subject:03d} run {run} failed validation and cannot be replayed.",
+            err=True,
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1)
+    return recordings[0]
+
+
+def _load_bundle(model_path: Path | None) -> Any:
+    from neurolink.realtime.demo_model import DEMO_MODEL_PATH, load_bundle
+
+    try:
+        return load_bundle(model_path or DEMO_MODEL_PATH)
+    except FileNotFoundError as exc:
+        typer.secho(str(exc), err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
 
 
 @app.command()
-def serve() -> None:
-    """Run the online classifier and the FastAPI WebSocket server (Phase 4)."""
-    _not_implemented("Phase 4")
+def stream(
+    subject: int = typer.Option(0, help="Subject to replay. 0 = the demo subject."),
+    run: int = typer.Option(12, help="Run to replay (12 is the held-out run)."),
+    loop: bool = typer.Option(True, "--loop/--once", help="Restart when the run ends."),
+    chunk: int = typer.Option(8, help="Samples per LSL chunk (8 = 50 ms)."),
+    raw_dir: Path = typer.Option(RAW_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """Replay a recorded run over LSL at 160 Hz in real time (EEG + true-label markers)."""
+    from neurolink.realtime.streamer import EEG_STREAM, MARKER_STREAM, ReplayStreamer
+
+    _setup_logging(verbose)
+    if subject == 0:
+        subject = _demo_subject(results_dir)
+    recording = _load_recording(subject, run, raw_dir)
+    streamer = ReplayStreamer(recording, chunk=chunk)
+    seconds = len(recording.data) / recording.sfreq
+    typer.echo(
+        f"streaming S{subject:03d} run {run} ({seconds:.0f} s, {len(recording.ch_names)} channels) "
+        f"as LSL streams {EEG_STREAM!r} and {MARKER_STREAM!r}; Ctrl+C to stop"
+    )
+    try:
+        sent = streamer.run(loop=loop)
+    except KeyboardInterrupt:
+        sent = streamer.n_sent
+    typer.echo(f"sent {sent} samples")
+
+
+@app.command()
+def serve(
+    model_path: Path = typer.Option(None, help="Demo model (default data/models/demo_model.pt)."),
+    host: str = typer.Option("127.0.0.1"),
+    port: int = typer.Option(8000),
+    timeout: float = typer.Option(10.0, help="Seconds to wait for the LSL EEG stream."),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """Run the online classifier on the LSL stream and serve predictions over WebSocket."""
+    import uvicorn
+
+    from neurolink.realtime.live import build_live
+
+    _setup_logging(verbose)
+    bundle = _load_bundle(model_path)
+    try:
+        live = build_live(bundle, timeout=timeout)
+    except (TimeoutError, ValueError) as exc:
+        typer.secho(f"{exc}. Start `neurolink stream` first.", err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=1) from exc
+    typer.echo(
+        f"model: {bundle.meta.get('candidate', '?')}, threshold {bundle.threshold:.3f}; "
+        f"predictions on ws://{host}:{port}/ws"
+    )
+    try:
+        uvicorn.run(live.app, host=host, port=port, log_level="info" if verbose else "warning")
+    finally:
+        live.close()
+
+
+@app.command()
+def latency(
+    duration: float = typer.Option(120.0, help="Seconds of streaming to time."),
+    chunk: int = typer.Option(8, help="Samples per LSL chunk (8 = 50 ms)."),
+    subject: int = typer.Option(0, help="Subject to replay. 0 = the demo subject."),
+    run: int = typer.Option(12),
+    model_path: Path = typer.Option(None, help="Demo model (default data/models/demo_model.pt)."),
+    name: str = typer.Option("latency.json", help="File name under results/realtime/."),
+    raw_dir: Path = typer.Option(RAW_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """Measure end-to-end latency: LSL sample -> prediction -> local WebSocket client."""
+    from neurolink.eval.report import save_realtime
+    from neurolink.realtime.live import measure_latency
+
+    _setup_logging(verbose)
+    bundle = _load_bundle(model_path)
+    if subject == 0:
+        subject = _demo_subject(results_dir)
+    recording = _load_recording(subject, run, raw_dir)
+    typer.echo(f"timing S{subject:03d} run {run} for {duration:g} s (chunk {chunk} samples) ...")
+    result = measure_latency(bundle, recording, duration_s=duration, chunk=chunk)
+    for stage, row in result["stages_ms"].items():
+        typer.echo(
+            f"{stage:15s} p50 {row['p50_ms']:6.1f} ms  p95 {row['p95_ms']:6.1f} ms  "
+            f"p99 {row['p99_ms']:6.1f} ms  max {row['max_ms']:6.1f} ms  (n={row['n']:.0f})"
+        )
+    typer.echo(f"wrote {save_realtime(name, result, results_dir)}")
 
 
 @app.command()
