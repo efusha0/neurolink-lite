@@ -1,5 +1,5 @@
 {
- "created": "2026-11-13T13:41:58+00:00",
+ "created": "2026-11-14T16:40:04+00:00",
  "version": "0.1.0",
  "rows": {
   "cross/csp_lda/causal": {
@@ -19427,9 +19427,15 @@
  },
  "demo_selection": {
   "cross/csp_lda/causal": {
-   "selection_rule": "held-out fold model, offline accuracy on runs 4+8",
+   "selection_rule": "held-out fold model, offline accuracy on runs 4+8; ties: pseudo-online accuracy (inside, smoothed) on runs 4+8, then lowest subject id",
    "subject": 7,
    "selection_score": 0.9333333333333333,
+   "tied_subjects": [
+    7
+   ],
+   "tie_break_scores": {
+    "7": 0.9186046511627907
+   },
    "run12_result": {
     "acc_inside_raw": 0.8992248062015504,
     "acc_inside_smooth": 0.9147286821705426,
@@ -19554,23 +19560,33 @@
    }
   },
   "cross/csp_lda/zero_phase": {
-   "selection_rule": "held-out fold model, offline accuracy on runs 4+8",
-   "subject": 7,
+   "selection_rule": "held-out fold model, offline accuracy on runs 4+8; ties: pseudo-online accuracy (inside, smoothed) on runs 4+8, then lowest subject id",
+   "subject": 31,
    "selection_score": 0.9333333333333333,
+   "tied_subjects": [
+    7,
+    29,
+    31
+   ],
+   "tie_break_scores": {
+    "7": 0.937984496124031,
+    "29": 0.8410852713178295,
+    "31": 0.9457364341085271
+   },
    "run12_result": {
-    "acc_inside_raw": 0.9069767441860465,
-    "acc_inside_smooth": 0.9534883720930233,
-    "acc_all_raw": 0.8048780487804879,
-    "acc_all_smooth": 0.8048780487804879,
-    "rest_active_rate": 0.3224489795918367,
-    "imagery_active_rate": 0.45934959349593496,
-    "acc_when_active": 1.0,
-    "rest_right_rate": 0.39183673469387753,
+    "acc_inside_raw": 0.8217054263565892,
+    "acc_inside_smooth": 0.7751937984496124,
+    "acc_all_raw": 0.7276422764227642,
+    "acc_all_smooth": 0.6829268292682927,
+    "rest_active_rate": 0.07531380753138076,
+    "imagery_active_rate": 0.11382113821138211,
+    "acc_when_active": 0.9285714285714286,
+    "rest_right_rate": 0.4811715481171548,
     "n_inside": 129.0,
     "n_all": 246.0,
-    "n_rest": 245.0,
-    "offline_acc": 0.9333333333333333,
-    "threshold": 0.6577661037445068
+    "n_rest": 239.0,
+    "offline_acc": 0.8,
+    "threshold": 0.64466692507267
    },
    "selection_scores": {
     "1": 0.6333333333333333,
@@ -19681,23 +19697,33 @@
    }
   },
   "cross/eegnet/causal": {
-   "selection_rule": "held-out fold model, offline accuracy on runs 4+8",
-   "subject": 2,
+   "selection_rule": "held-out fold model, offline accuracy on runs 4+8; ties: pseudo-online accuracy (inside, smoothed) on runs 4+8, then lowest subject id",
+   "subject": 7,
    "selection_score": 0.9666666666666667,
+   "tied_subjects": [
+    2,
+    7,
+    85
+   ],
+   "tie_break_scores": {
+    "2": 0.8837209302325582,
+    "7": 0.9418604651162791,
+    "85": 0.8682170542635659
+   },
    "run12_result": {
-    "acc_inside_raw": 0.7364341085271318,
-    "acc_inside_smooth": 0.6976744186046512,
-    "acc_all_raw": 0.6504065040650406,
-    "acc_all_smooth": 0.6585365853658537,
-    "rest_active_rate": 0.6108786610878661,
-    "imagery_active_rate": 0.5813008130081301,
-    "acc_when_active": 0.7482517482517482,
-    "rest_right_rate": 0.33472803347280333,
+    "acc_inside_raw": 0.9767441860465116,
+    "acc_inside_smooth": 1.0,
+    "acc_all_raw": 0.8739837398373984,
+    "acc_all_smooth": 0.8699186991869918,
+    "rest_active_rate": 0.5346938775510204,
+    "imagery_active_rate": 0.6422764227642277,
+    "acc_when_active": 0.9430379746835443,
+    "rest_right_rate": 0.32653061224489793,
     "n_inside": 129.0,
     "n_all": 246.0,
-    "n_rest": 239.0,
-    "offline_acc": 0.7333333333333333,
-    "threshold": 0.6645122393965721
+    "n_rest": 245.0,
+    "offline_acc": 1.0,
+    "threshold": 0.688223272562027
    },
    "selection_scores": {
     "1": 0.7333333333333333,
@@ -19808,9 +19834,15 @@
    }
   },
   "cross/eegnet/zero_phase": {
-   "selection_rule": "held-out fold model, offline accuracy on runs 4+8",
+   "selection_rule": "held-out fold model, offline accuracy on runs 4+8; ties: pseudo-online accuracy (inside, smoothed) on runs 4+8, then lowest subject id",
    "subject": 2,
    "selection_score": 1.0,
+   "tied_subjects": [
+    2
+   ],
+   "tie_break_scores": {
+    "2": 0.9031007751937985
+   },
    "run12_result": {
     "acc_inside_raw": 0.7674418604651163,
     "acc_inside_smooth": 0.7209302325581395,
@@ -19935,9 +19967,14 @@
    }
   },
   "subject/csp_lda/causal": {
-   "selection_rule": "5-fold CV on runs 4+8",
+   "selection_rule": "5-fold CV on runs 4+8; ties: lowest subject id",
    "subject": 29,
    "selection_score": 1.0,
+   "tied_subjects": [
+    29,
+    42
+   ],
+   "tie_break_scores": {},
    "run12_result": {
     "acc_inside_raw": 0.9457364341085271,
     "acc_inside_smooth": 0.9302325581395349,
@@ -20062,9 +20099,13 @@
    }
   },
   "subject/eegnet/causal": {
-   "selection_rule": "5-fold CV on runs 4+8",
+   "selection_rule": "5-fold CV on runs 4+8; ties: lowest subject id",
    "subject": 62,
    "selection_score": 0.9666666666666667,
+   "tied_subjects": [
+    62
+   ],
+   "tie_break_scores": {},
    "run12_result": {
     "acc_inside_raw": 0.7751937984496124,
     "acc_inside_smooth": 0.8217054263565892,
@@ -20188,6 +20229,113 @@
     "109": 0.4
    }
   }
+ },
+ "fold_of": {
+  "1": 0,
+  "2": 2,
+  "3": 0,
+  "4": 2,
+  "5": 0,
+  "6": 2,
+  "7": 4,
+  "8": 1,
+  "9": 4,
+  "10": 3,
+  "11": 1,
+  "12": 4,
+  "13": 4,
+  "14": 4,
+  "15": 4,
+  "16": 3,
+  "17": 3,
+  "18": 1,
+  "19": 0,
+  "20": 4,
+  "21": 2,
+  "22": 1,
+  "23": 4,
+  "24": 3,
+  "25": 1,
+  "26": 0,
+  "27": 1,
+  "28": 0,
+  "29": 0,
+  "30": 1,
+  "31": 3,
+  "32": 3,
+  "33": 2,
+  "34": 0,
+  "35": 3,
+  "36": 4,
+  "37": 4,
+  "38": 0,
+  "39": 0,
+  "40": 1,
+  "41": 2,
+  "42": 4,
+  "43": 2,
+  "44": 2,
+  "45": 3,
+  "46": 1,
+  "47": 0,
+  "48": 4,
+  "49": 3,
+  "50": 4,
+  "51": 0,
+  "52": 2,
+  "53": 2,
+  "54": 4,
+  "55": 3,
+  "56": 0,
+  "57": 0,
+  "58": 2,
+  "59": 3,
+  "60": 2,
+  "61": 3,
+  "62": 0,
+  "63": 3,
+  "64": 2,
+  "65": 4,
+  "66": 4,
+  "67": 4,
+  "68": 3,
+  "69": 1,
+  "70": 1,
+  "71": 1,
+  "72": 2,
+  "73": 1,
+  "74": 3,
+  "75": 3,
+  "76": 1,
+  "77": 3,
+  "78": 4,
+  "79": 1,
+  "80": 0,
+  "81": 1,
+  "82": 0,
+  "83": 2,
+  "84": 0,
+  "85": 1,
+  "86": 0,
+  "87": 3,
+  "89": 2,
+  "90": 2,
+  "91": 4,
+  "93": 1,
+  "94": 2,
+  "95": 3,
+  "96": 1,
+  "97": 4,
+  "98": 2,
+  "99": 1,
+  "101": 4,
+  "102": 1,
+  "103": 0,
+  "105": 3,
+  "106": 2,
+  "107": 2,
+  "108": 3,
+  "109": 0
  },
  "config": {
   "seed": 42,

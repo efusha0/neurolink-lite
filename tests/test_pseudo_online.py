@@ -11,8 +11,8 @@ from neurolink.config import MOTOR_CORTEX_CHANNELS, SFREQ, PreprocessConfig, Rea
 from neurolink.data.cache import cache_key
 from neurolink.data.loader import ValidationReport, standardize_channel_names
 from neurolink.data.pipeline import build_dataset
-from neurolink.eval.online_eval import run_experiment, summarize
-from neurolink.eval.report import save_pseudo_online
+from neurolink.eval.online_eval import resummarize, run_experiment, summarize
+from neurolink.eval.report import _nan_to_none, save_pseudo_online
 from neurolink.models.base import Classifier
 from neurolink.models.csp_lda import make_csp_lda
 from neurolink.realtime.pseudo_online import (
@@ -247,3 +247,60 @@ def test_save_pseudo_online_writes_json_and_markdown(experiment, tmp_path: Path)
     md = (tmp_path / "RESULTS.md").read_text(encoding="utf-8")
     assert "## Pseudo-online accuracy" in md
     assert "| subject/csp_lda/causal | 4 |" in md
+
+
+def _tie_arrays() -> dict[str, np.ndarray]:
+    """4 subjects x runs (4, 8, 12) x 4 fully-inside 'right' windows + 2 rest windows."""
+    subject, run, label, inside = [], [], [], []
+    for s in (1, 2, 3, 4):
+        for r in RUNS:
+            subject += [s] * 6
+            run += [r] * 6
+            label += [1, 1, 1, 1, REST, REST]
+            inside += [True] * 4 + [False] * 2
+    arrays: dict[str, np.ndarray] = {
+        "subject": np.array(subject), "run": np.array(run),
+        "label": np.array(label, dtype=np.int8), "inside": np.array(inside),
+    }  # fmt: skip
+    p = np.full(len(subject), 0.9, dtype=np.float32)  # everything decoded as "right"
+    s_, r_ = arrays["subject"], arrays["run"]
+    # Subject 1: half wrong on the training runs, perfect on run 12.
+    # Subject 3: perfect on the training runs, all wrong on run 12.
+    wrong = ((s_ == 1) & (r_ != 12) & (np.arange(len(p)) % 2 == 0)) | ((s_ == 3) & (r_ == 12))
+    p[wrong & (arrays["label"] == 1)] = 0.1
+    for cand in ("cross/m/causal", "subject/m/causal"):
+        for suffix in ("/fold0", "/fold1") if cand.startswith("cross") else ("",):
+            arrays[f"raw::{cand}{suffix}"] = p
+            arrays[f"smooth::{cand}{suffix}"] = p
+    return arrays
+
+
+def test_demo_tie_is_broken_by_pseudo_online_accuracy_on_training_runs() -> None:
+    arrays = _tie_arrays()
+    fold_of = {1: 0, 2: 0, 3: 1, 4: 1}
+    scores = {1: 0.9, 2: 0.5, 3: 0.9, 4: 0.9 - 1e-3}
+    selection = {"cross/m/causal": dict(scores), "subject/m/causal": dict(scores)}
+    offline = {c: {s: 0.0 for s in fold_of} for c in selection}
+    demo = summarize(arrays, fold_of, offline, offline, selection, 0.75)["demo_selection"]
+
+    cross = demo["cross/m/causal"]
+    assert cross["tied_subjects"] == [1, 3]
+    assert cross["tie_break_scores"] == {"1": 0.5, "3": 1.0}
+    # Subject 3 wins on runs 4+8 although subject 1 is the better one on run 12.
+    assert cross["subject"] == 3
+    assert cross["run12_result"]["acc_inside_smooth"] == 0.0
+    # Per-subject models saw runs 4+8 in training: no pseudo-online tie-break, lowest id.
+    assert demo["subject/m/causal"]["subject"] == 1
+    assert demo["subject/m/causal"]["tie_break_scores"] == {}
+
+
+def test_resummarize_reproduces_the_summary_from_saved_files(experiment, tmp_path: Path) -> None:  # type: ignore[no-untyped-def]
+    summary, store = experiment
+    saved = json.loads(save_pseudo_online(summary, tmp_path).read_text(encoding="utf-8"))
+    again = _nan_to_none(resummarize(saved, store.arrays()))  # NaN != NaN, None == None
+    for key in ("rows", "thresholds", "demo_selection", "fold_of", "config"):
+        assert again[key] == saved[key], key
+    # Summaries written before ``fold_of`` was stored are handled by recomputing the folds.
+    del saved["fold_of"]
+    saved["config"]["seed"] = 0
+    assert resummarize(saved, store.arrays())["fold_of"] == summary["fold_of"]

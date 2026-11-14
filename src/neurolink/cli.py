@@ -268,28 +268,50 @@ def pseudo_online(
     raw_dir: Path = typer.Option(RAW_DIR),
     cache_dir: Path = typer.Option(CACHE_DIR),
     results_dir: Path = typer.Option(RESULTS_DIR),
+    resummarize: bool = typer.Option(
+        False,
+        "--resummarize",
+        help="Do not train: rebuild the summary from the stored window outputs.",
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v"),
 ) -> None:
     """Score every candidate demo model with the online pipeline on held-out recordings."""
-    from neurolink.eval.online_eval import default_makers, run_experiment
-    from neurolink.eval.report import save_pseudo_online
+    import json
+
+    from neurolink.eval import online_eval
+    from neurolink.eval.report import PSEUDO_ONLINE_DIR, PSEUDO_ONLINE_JSON, save_pseudo_online
     from neurolink.utils.seed import set_seed
 
     _setup_logging(verbose)
     set_seed(seed)
-    makers = default_makers(seed, epochs_cross, epochs_subject, threads)
-    summary, store = run_experiment(
-        _subjects_option(subjects),
-        seed,
-        makers,
-        n_splits=n_splits,
-        cache_dir=cache_dir,
-        raw_dir=raw_dir,
-    )
     windows_path = cache_dir / "pseudo_online_windows.npz"
-    np.savez_compressed(str(windows_path), allow_pickle=False, **store.arrays())
+    if resummarize:
+        previous_path = results_dir / PSEUDO_ONLINE_DIR / PSEUDO_ONLINE_JSON
+        if not (windows_path.exists() and previous_path.exists()):
+            typer.secho(
+                f"--resummarize needs {windows_path} and {previous_path}; "
+                "run `neurolink pseudo-online` first.",
+                err=True,
+                fg=typer.colors.RED,
+            )
+            raise typer.Exit(code=1)
+        with np.load(windows_path) as npz:
+            arrays = {k: npz[k] for k in npz.files}
+        previous = json.loads(previous_path.read_text(encoding="utf-8"))
+        summary = online_eval.resummarize(previous, arrays)
+    else:
+        makers = online_eval.default_makers(seed, epochs_cross, epochs_subject, threads)
+        summary, store = online_eval.run_experiment(
+            _subjects_option(subjects),
+            seed,
+            makers,
+            n_splits=n_splits,
+            cache_dir=cache_dir,
+            raw_dir=raw_dir,
+        )
+        np.savez_compressed(str(windows_path), allow_pickle=False, **store.arrays())
+        typer.echo(f"window-level outputs: {windows_path}")
     path = save_pseudo_online(summary, results_dir)
-    typer.echo(f"window-level outputs: {windows_path}")
     typer.echo(f"wrote {path}")
     for name, row in summary["rows"].items():
         typer.echo(

@@ -15,6 +15,10 @@ Candidates = scope x model x training filter:
 Nothing is fitted on test data: models, normalization and the confidence threshold come
 from training subjects (cross) or training runs (subject) only. The demo-subject selection
 scores use runs 4 and 8 only, never the replayed run 12.
+
+Demo subject: highest selection score; ties between cross-subject candidates are broken
+by the pseudo-online accuracy on runs 4 and 8 (many more windows than the 30 epochs
+behind the selection score), then by the lowest subject id.
 """
 
 from __future__ import annotations
@@ -121,6 +125,15 @@ def default_makers(
     return {"eegnet": eegnet, "csp_lda": csp_lda}
 
 
+def subject_folds(subjects: NDArray[np.int64], n_splits: int, seed: int) -> dict[int, int]:
+    """Subject id -> index of the cross-subject fold in which that subject is held out."""
+    fold_of: dict[int, int] = {}
+    for k, (_tr, te) in enumerate(grouped_subject_folds(subjects, n_splits, seed)):
+        for s in np.unique(subjects[te]).tolist():
+            fold_of[int(s)] = k
+    return fold_of
+
+
 def _accuracy(model: Classifier, x: NDArray[np.float32], y: NDArray[np.int64]) -> float:
     if len(y) == 0:
         return float("nan")
@@ -179,10 +192,7 @@ def run_experiment(
 
     # ---------------------------------------------------------------- cross-subject models
     folds = list(grouped_subject_folds(ref.subjects, n_splits, seed))
-    fold_of: dict[int, int] = {}
-    for k, (_tr, te) in enumerate(folds):
-        for s in np.unique(ref.subjects[te]).tolist():
-            fold_of[s] = k
+    fold_of = subject_folds(ref.subjects, n_splits, seed)
     cross_models: dict[tuple[str, str], list[Classifier]] = {}
     for kind in kinds:
         for filt in FILTERS:
@@ -322,6 +332,7 @@ def summarize(
 
     rows: dict[str, Any] = {}
     thresholds: dict[str, Any] = {}
+    tie_break: dict[str, dict[int, float]] = {}
     for cand in candidates:
         scope = cand.split("/")[0]
         if scope == "cross":
@@ -345,6 +356,10 @@ def summarize(
                         row["offline_acc"] = off[cand][s]
                         row["threshold"] = thr
                         table[s] = row
+                    mask = (subject == s) & is_train_run
+                    tie_break.setdefault(cand, {})[s] = window_metrics(
+                        raw[mask], smooth[mask], label[mask], inside[mask], thr
+                    )["acc_inside_smooth"]
             rows[cand] = _aggregate(all_runs)
             rows[f"{cand} (run {TEST_RUN} only)"] = _aggregate(test_run)
         else:
@@ -362,17 +377,66 @@ def summarize(
 
     demo: dict[str, Any] = {}
     for cand, scores in sorted(selection.items()):
-        best = max(sorted(scores), key=lambda s: scores[s])  # ties -> lowest subject id
-        outcome_key = f"{cand} (run {TEST_RUN} only)" if cand.startswith("cross") else cand
+        is_cross = cand.startswith("cross")
+        top = max(scores.values())
+        tied = sorted(s for s, v in scores.items() if np.isclose(v, top))
+        # The pseudo-online tie-break needs a model that has not seen runs 4+8 of the
+        # subject, which only holds for cross-subject models; per-subject models were
+        # trained on those runs, so their ties fall through to the lowest subject id.
+        extra = tie_break.get(cand, {}) if is_cross else {}
+        best = max(tied, key=lambda s: (extra.get(s, 0.0), -s))
+        outcome_key = f"{cand} (run {TEST_RUN} only)" if is_cross else cand
         demo[cand] = {
             "selection_rule": (
-                "held-out fold model, offline accuracy on runs 4+8"
-                if cand.startswith("cross")
-                else "5-fold CV on runs 4+8"
+                "held-out fold model, offline accuracy on runs 4+8; ties: pseudo-online "
+                "accuracy (inside, smoothed) on runs 4+8, then lowest subject id"
+                if is_cross
+                else "5-fold CV on runs 4+8; ties: lowest subject id"
             ),
             "subject": best,
             "selection_score": scores[best],
+            "tied_subjects": tied,
+            "tie_break_scores": {str(s): extra[s] for s in tied if s in extra},
             "run12_result": rows[outcome_key]["per_subject"][str(best)],
             "selection_scores": {str(s): v for s, v in sorted(scores.items())},
         }
-    return {"rows": rows, "thresholds": thresholds, "demo_selection": demo}
+    return {
+        "rows": rows,
+        "thresholds": thresholds,
+        "demo_selection": demo,
+        "fold_of": {str(s): k for s, k in sorted(fold_of.items())},
+    }
+
+
+def resummarize(previous: dict[str, Any], arrays: dict[str, NDArray[Any]]) -> dict[str, Any]:
+    """Recompute the summary from stored window outputs without retraining any model.
+
+    ``previous`` is an earlier summary (it carries the offline accuracies and selection
+    scores, which need the models) and ``arrays`` the matching :class:`WindowStore` dump.
+    Used when only the aggregation changes, e.g. the demo-subject tie-break rule.
+    """
+    rows, config = previous["rows"], previous["config"]
+    test_suffix = f" (run {TEST_RUN} only)"
+
+    def column(row_key: str) -> dict[int, float]:
+        per = rows[row_key]["per_subject"]
+        return {int(s): float("nan") if r["offline_acc"] is None else r["offline_acc"]
+                for s, r in per.items()}  # fmt: skip
+
+    cands = [k for k in rows if not k.endswith(test_suffix)]
+    offline = {c: column(c) for c in cands}
+    offline_test_run = {c: column(c + test_suffix if c.startswith("cross") else c) for c in cands}
+    selection = {
+        c: {int(s): float(v) for s, v in d["selection_scores"].items()}
+        for c, d in previous["demo_selection"].items()
+    }
+    if "fold_of" in previous:
+        fold_of = {int(s): int(k) for s, k in previous["fold_of"].items()}
+    else:
+        valid = np.unique(arrays["subject"])
+        fold_of = subject_folds(valid, config["n_splits"], config["seed"])
+    summary = summarize(
+        arrays, fold_of, offline, offline_test_run, selection, config["rest_quantile"]
+    )
+    summary["config"] = config
+    return summary
