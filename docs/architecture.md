@@ -198,3 +198,28 @@ decisions that are not obvious from the code.
   as near-instant reactions and yields a median of 0.45 s over all subjects, which
   measures carry-over from rest rather than reaction. Both variants are in
   `results/RESULTS.md`; the README leads with the corrected one and shows both.
+
+## Decisions (Phase 5)
+
+- **The game follows the recording.** Nobody is steering: the target is the wall of the
+  cued side of the replayed trial, and the cursor returns to the centre at every cue. The
+  rules live twice, in `frontend/src/game.ts` (browser) and `src/neurolink/eval/game.py`
+  (simulation); `frontend/src/fixtures/game_cases.json` is replayed by the tests of both,
+  so they cannot drift apart.
+- **Cursor speed chosen on runs 4 and 8 of S007 only.** The one free parameter is the
+  travel time: seconds from the centre to a wall at full confidence (velocity =
+  (p_right - p_left) / travel time while above the threshold). `neurolink game-speed`
+  simulates the game on the stored pseudo-online outputs of S007 for runs 4 and 8 (30
+  trials, held-out fold model, that fold's threshold) for a grid fixed beforehand
+  (0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3 s) and takes the travel time with the most
+  hits minus wrong-side hits; ties go to the slower cursor. Result: 0.75 s and 1 s tie at
+  12 (15 hits / 3 wrong and 14 hits / 2 wrong), so 1 s is used. Grid, criterion and
+  tie-break were written into the code before the command was first run.
+- **Run 12 is reported as it comes out.** With 1 s the simulation gives 12 of 15 hits, no
+  wrong-side hit and 3 timeouts on run 12 (median 3.3 s to a hit); on runs 4 and 8 the
+  same setting gives 14 of 30. The demo run is the better half of this subject's data, by
+  luck of the split, not by choice. Mean over all 105 subjects with the same speed:
+  19.6 % hits, 7.0 % wrong side, 73.4 % timeouts; no subject reaches 70 % over all runs.
+  The UI prints the best-case and the average numbers under the game (from `/info`).
+- **Serving the built UI from FastAPI is left to Phase 6.** In Phase 5 the Vite dev
+  server proxies `/ws`, `/info`, `/health` and `/latency` to `neurolink serve`.

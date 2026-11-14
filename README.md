@@ -2,7 +2,7 @@
 
 > **Status:** work in progress. Data pipeline, CSP+LDA baseline, EEGNet and the real-time
 > system (LSL replay, online classifier, WebSocket server) are done (Phases 0-4); the
-> browser UI (Phase 5) and the one-command demo (Phase 6) are next.
+> browser UI (Phase 5) is awaiting review and the one-command demo (Phase 6) is next.
 
 NeuroLink-lite is a small, honest, open-source brain-computer interface (BCI) project.
 It classifies EEG recorded while a person *imagines* moving their left or right hand, and
@@ -265,13 +265,20 @@ skipped subjects (1):
   S088: run 4: sampling rate 128 Hz != 160 Hz; run 8: ...; run 12: ...
 ```
 
-Frontend (Vite + TypeScript):
+Browser UI (Vite + TypeScript), with `neurolink stream` and `neurolink serve` running:
 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev        # then open http://localhost:5173
 ```
+
+The page shows the cursor and the cued target, the smoothed class probabilities with the
+confidence threshold, the true label next to the prediction, three filtered EEG traces and
+running counters (game score, accuracy during cues, false commands at rest, latency).
+The cursor speed was chosen on runs 4 and 8 of the demo subject only
+(`uv run neurolink game-speed`); on the replayed run 12 the game then scores 12 of 15 hits,
+against a mean of 19.6 % hits over all 105 subjects. See `results/RESULTS.md`.
 
 ## Development
 
