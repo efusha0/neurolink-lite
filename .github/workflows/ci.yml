@@ -38,7 +38,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
+          # vitest 5 needs Node >= 22.12. "22" resolves to the newest 22.x release; the
+          # step below fails the job if that ever is older than the minimum.
           node-version: "22"
+      - name: Check the Node.js version (>= 22.12)
+        run: |
+          node --version
+          node -e "const [a, b] = process.versions.node.split('.').map(Number); if (a < 22 || (a === 22 && b < 12)) { console.error('Node >= 22.12 is required'); process.exit(1); }"
       - name: Install dependencies
         run: npm ci
       - name: Type-check
