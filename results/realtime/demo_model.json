@@ -1,0 +1,93 @@
+{
+ "version": "0.1.0",
+ "candidate": "cross/eegnet/causal",
+ "created": "2026-11-14T16:44:30+00:00",
+ "demo_subject": 7,
+ "fold": 4,
+ "n_splits": 5,
+ "seed": 42,
+ "epochs": 30,
+ "n_train_subjects": 84,
+ "n_train_epochs": 3780,
+ "threshold": 0.6882232562447779,
+ "demo_subject_offline_acc": 0.9777777777777777,
+ "channels": [
+  "FC5",
+  "FC3",
+  "FC1",
+  "FCz",
+  "FC2",
+  "FC4",
+  "FC6",
+  "C5",
+  "C3",
+  "C1",
+  "Cz",
+  "C2",
+  "C4",
+  "C6",
+  "CP5",
+  "CP3",
+  "CP1",
+  "CPz",
+  "CP2",
+  "CP4",
+  "CP6"
+ ],
+ "band": [
+  8.0,
+  30.0
+ ],
+ "car": true,
+ "window_s": 2.0,
+ "step_s": 0.25,
+ "smoothing_alpha": 0.3,
+ "filter_order": 4,
+ "rest_quantile": 0.75,
+ "selection": {
+  "selection_rule": "held-out fold model, offline accuracy on runs 4+8; ties: pseudo-online accuracy (inside, smoothed) on runs 4+8, then lowest subject id",
+  "selection_score": 0.9666666666666667,
+  "tied_subjects": [
+   2,
+   7,
+   85
+  ],
+  "tie_break_scores": {
+   "2": 0.8837209302325582,
+   "7": 0.9418604651162791,
+   "85": 0.8682170542635659
+  }
+ },
+ "pseudo_online_run12": {
+  "acc_inside_raw": 0.9767441860465116,
+  "acc_inside_smooth": 1.0,
+  "acc_all_raw": 0.8739837398373984,
+  "acc_all_smooth": 0.8699186991869918,
+  "rest_active_rate": 0.5346938775510204,
+  "imagery_active_rate": 0.6422764227642277,
+  "acc_when_active": 0.9430379746835443,
+  "rest_right_rate": 0.32653061224489793,
+  "n_inside": 129.0,
+  "n_all": 246.0,
+  "n_rest": 245.0,
+  "offline_acc": 1.0,
+  "threshold": 0.688223272562027
+ },
+ "pseudo_online_all_runs": {
+  "acc_inside_raw": 0.9457364341085271,
+  "acc_inside_smooth": 0.9612403100775194,
+  "acc_all_raw": 0.8441734417344173,
+  "acc_all_smooth": 0.8346883468834688,
+  "rest_active_rate": 0.5102040816326531,
+  "imagery_active_rate": 0.5894308943089431,
+  "acc_when_active": 0.8827586206896552,
+  "rest_right_rate": 0.2789115646258503,
+  "n_inside": 387.0,
+  "n_all": 738.0,
+  "n_rest": 735.0,
+  "offline_acc": 0.9777777777777777,
+  "threshold": 0.688223272562027
+ },
+ "experiment_threshold": 0.688223272562027,
+ "matches_pseudo_online_experiment": true
+}

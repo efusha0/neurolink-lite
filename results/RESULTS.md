@@ -89,3 +89,33 @@ EMA smoothing (alpha = 0.3). Mean +/- std across subjects, in %.
 | subject/csp_lda/zero_phase | 105 | 62.5 +/- 16.4 | 61.0 +/- 14.8 | 61.5 +/- 15.2 | 58.6 +/- 11.6 | 35.4 +/- 20.3 | 35.2 +/- 19.8 | 63.7 +/- 18.3 |
 | subject/eegnet/causal | 105 | 60.6 +/- 16.7 | 58.0 +/- 13.8 | 58.9 +/- 14.6 | 56.4 +/- 10.5 | 33.5 +/- 13.6 | 31.0 +/- 12.9 | 60.0 +/- 16.8 |
 | subject/eegnet/zero_phase | 105 | 59.4 +/- 17.6 | 58.4 +/- 13.2 | 59.0 +/- 14.4 | 55.7 +/- 11.2 | 33.0 +/- 14.4 | 32.0 +/- 14.3 | 60.0 +/- 17.2 |
+
+## Demo model
+
+`cross/eegnet/causal`, the fold model that holds S007 out: trained on 84 other subjects (3780 epochs), confidence threshold 0.688 from their rest windows.
+Demo subject rule: held-out fold model, offline accuracy on runs 4+8; ties: pseudo-online accuracy (inside, smoothed) on runs 4+8, then lowest subject id. Selection score 96.7 %. Tie-break among equal scores: S002 88.4 %, S007 94.2 %, S085 86.8 %.
+Run 12 was not used to select the model or the subject.
+
+| Data | Offline | Inside, smoothed | All, smoothed | Rest active | Trial active | Acc. active |
+|---|---:|---:|---:|---:|---:|---:|
+| S007, run 12 (replayed in the demo) | 100.0 | 100.0 | 87.0 | 53.5 | 64.2 | 94.3 |
+| S007, all three runs | 97.8 | 96.1 | 83.5 | 51.0 | 58.9 | 88.3 |
+
+This subject is a best case; the average over all subjects is the `cross/eegnet/causal` row of the pseudo-online table above.
+
+## Latency
+
+Time from the acquisition (LSL timestamp) of the newest sample of a window to:
+the smoothed prediction (`stream_to_pred`), the hand-over to the WebSocket
+(`pred_to_ws`, measured from the prediction) and the arrival at a WebSocket
+client on the same machine (`end_to_end`). Browser rendering is not included.
+The 2 s analysis window is not part of these numbers.
+
+| Measurement | Stage | Predictions | Mean (ms) | p50 (ms) | p95 (ms) | p99 (ms) | Max (ms) |
+|---|---|---:|---:|---:|---:|---:|---:|
+| S007 run 12, 120 s, 50 ms chunks | stream_to_pred | 465 | 6.2 | 6.4 | 10.4 | 13.7 | 17.9 |
+| S007 run 12, 120 s, 50 ms chunks | pred_to_ws | 465 | 1.6 | 1.3 | 3.6 | 4.2 | 4.8 |
+| S007 run 12, 120 s, 50 ms chunks | end_to_end | 465 | 8.8 | 9.3 | 15.3 | 18.0 | 23.5 |
+| S007 run 12, 60 s, 200 ms chunks | stream_to_pred | 225 | 79.5 | 53.2 | 163.6 | 165.7 | 168.5 |
+| S007 run 12, 60 s, 200 ms chunks | pred_to_ws | 225 | 0.5 | 0.4 | 0.7 | 2.1 | 3.1 |
+| S007 run 12, 60 s, 200 ms chunks | end_to_end | 225 | 80.3 | 54.1 | 164.9 | 167.1 | 169.8 |
