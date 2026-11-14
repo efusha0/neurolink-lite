@@ -1,8 +1,8 @@
 # NeuroLink-lite: Thought-Controlled Cursor (EEG + Deep Learning)
 
-> **Status:** work in progress. Data pipeline, CSP+LDA baseline, EEGNet and the real-time
-> system (LSL replay, online classifier, WebSocket server) are done (Phases 0-4); the
-> browser UI (Phase 5) is awaiting review and the one-command demo (Phase 6) is next.
+> **Status:** work in progress. Data pipeline, CSP+LDA baseline, EEGNet, the real-time
+> system (LSL replay, online classifier, WebSocket server) and the browser UI are done
+> (Phases 0-5); the one-command demo and the final polish (Phase 6) are next.
 
 NeuroLink-lite is a small, honest, open-source brain-computer interface (BCI) project.
 It classifies EEG recorded while a person *imagines* moving their left or right hand, and
@@ -227,7 +227,7 @@ is the share of all trials of the row.
 
 ### Browser UI
 
-![The UI during a rest period: the decoder is 89 % sure of "left" and the cursor moves although nothing is being imagined](docs/ui.png)
+![The UI during a rest period: the decoder is 78 % sure of "right" and the cursor moves although nothing is being imagined](docs/ui.png)
 
 The page (Vite + TypeScript + Canvas, no framework) shows what the decoder does and, next
 to it, what it should have done:
@@ -239,8 +239,8 @@ to it, what it should have done:
 - **True label vs prediction.** The state of the recording (rest / left / right) beside the
   decoder output, with a verdict for the current window.
 - **Filtered EEG** of C3, Cz and C4 (the last 8 s), shaded by the true cue.
-- **Counters** for the session: game score, accuracy during cues, share of rest windows
-  that move the cursor, pipeline latency.
+- **Counters** for the current pass of the replay: game score, accuracy during cues,
+  share of rest windows that move the cursor, and the pipeline latency.
 
 **The target game follows the recording.** Nobody is steering, so the user cannot pick a
 target. When a trial starts the cursor returns to the centre and the target is the wall
@@ -263,9 +263,21 @@ The demo run happens to be the better part of this subject's data (80.0 % of tar
 against 46.7 % on the two runs the speed was chosen on); that is how the split fell, not
 a choice. For the average subject the game is mostly timeouts: 0 of 105 subjects hit
 70 % of their targets over all three runs. A hit takes a median of 3.3 s of the 4.1 s
-trial. The live UI agrees with the simulation: over one pass of run 12 in the browser it
-showed 12 hits, no wrong-side hit and 2 timeouts in the 14 trials it saw, 89 % of cue
-windows correct, and the cursor moving during 54 % of rest windows.
+trial.
+
+**The counters cover one pass of the run.** The streamer replays run 12 in a loop and
+numbers the passes; the page starts its counters again with every pass and lists the
+scores of the earlier ones, so what is on screen can be compared with the "12 of 15"
+above. A pass the page saw only in part (it was opened in the middle, or the connection
+dropped) is marked as such, and a trial that was already running when the page connected
+is not scored.
+
+**The game runs on stream time.** Each prediction moves the cursor for exactly one
+decoder step (0.25 s), whether or not the browser drew a frame in between. The first
+version moved the cursor only when a frame was drawn, and a browser tab in the background
+draws none: with the page left open behind another window it showed 24 hits in 52 trials
+with 28 timeouts, while the decoder was right in 87 % of the cue windows. That was a bug
+of the page, not a property of the decoder. Checked in headless Chrome after the fix, with the tab hidden for more than four minutes: the pass played entirely in the background scored 12 of 15 hits with no wrong-side hit, and the pass the page had joined after its first trial 12 of 14, as in the simulation.
 
 ## How to run
 
@@ -312,7 +324,7 @@ Browser UI (Vite + TypeScript), with `neurolink stream` and `neurolink serve` ru
 
 ```bash
 cd frontend
-npm install
+npm install        # Node 22.12 or newer
 npm run dev        # then open http://localhost:5173
 ```
 

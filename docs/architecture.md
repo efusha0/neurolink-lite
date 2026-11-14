@@ -223,10 +223,42 @@ decisions that are not obvious from the code.
   The UI prints the best-case and the average numbers under the game (from `/info`).
 - **Serving the built UI from FastAPI is left to Phase 6.** In Phase 5 the Vite dev
   server proxies `/ws`, `/info`, `/health` and `/latency` to `neurolink serve`.
-- **The live game agrees with the simulation.** One pass of run 12 through streamer,
-  server and browser (headless Chrome) showed 12 hits, no wrong-side hit and 2 timeouts in
-  the 14 trials the page saw, median 3.3 s to a hit; the simulation gives 12 hits and 3
-  timeouts in 15 trials, median 3.3 s. The page joined after the first trial had begun.
+- **The game runs on stream time, not on animation frames.** The first version moved the
+  cursor inside `requestAnimationFrame`. A hidden or covered browser tab gets no frames
+  while the WebSocket keeps delivering predictions, so the cursor stood still and every
+  trial played in the background ended as a timeout: a session left open behind another
+  window showed 24 hits in 52 trials, 28 timeouts and no wrong-side hit, with 87 % of the
+  cue windows decoded correctly. (Reproduced in headless Chrome: 3 of 3 hits while
+  visible, then no hit and 5 timeouts in the 6 trials that began while hidden.) Now every prediction
+  grants its velocity one decoder step of stream time; frames spend that budget for
+  smooth drawing and the next prediction spends what is left. The score is the same for
+  any frame timing, including none; `game.test.ts` replays the shared cases without a
+  single frame and with irregular ones. Looping the recording was not the cause: four
+  looped passes through the online decoder give 12 of 15 hits each (run 12 is 20000
+  samples, a multiple of the 40-sample step, so every pass sees the same windows).
+- **The counters cover one replay pass.** Summing passes gives a number that matches
+  nothing reported offline. The streamer numbers its passes in the marker stream
+  (`"left|3"`, repeated every second so a late joiner learns the state at once), the
+  server adds `replay_pass` to every prediction, and the page (`session.ts`) starts the
+  counters again with each pass, keeps the scores of the last five and marks a pass it
+  did not see from start to end. The classifier still never reads the marker stream.
+- **A trial whose start was not seen is not scored.** The page may connect, or reconnect
+  after a gap of more than a second of stream time, in the middle of a trial; the cursor
+  was then not reset at the cue, so the outcome would mean nothing. Such a trial is
+  skipped, and one that was open when the stream broke off is dropped. The simulation
+  does not need this rule: all 315 stored runs start with a rest window. The shared
+  fixture cases therefore all start with rest.
+- **The live game agrees with the simulation.** After the fix, streamer, server and browser (headless Chrome, dev server of vite 8) were run with the tab visible for 10 s, hidden for 250 s and visible again: pass 1, which the page joined after the first trial, scored 12 hits in 14 trials (marked partial), pass 2, played entirely while hidden, 12 hits, no wrong-side hit and 3 timeouts in 15 trials. The simulation gives 12 hits and 3 timeouts in 15 trials.
+- **Frontend dependencies.** `npm audit` reported 6 advisories (2 critical, 1 high,
+  3 moderate), all in the development tool chain: esbuild <= 0.24.2 (any website can
+  read from the dev server), vite <= 6.4.3 and vite-node, which depend on it, and
+  tinypool <= 2.1.1 and @vitest/mocker <= 4.1.11 inside vitest. None of it is in the
+  built page, which has no runtime dependencies. `npm audit fix` without `--force`
+  changes nothing, because every fix is a major version of vite or vitest. Instead of
+  forcing it, the two packages were raised by hand to the current majors (vite 5 -> 8,
+  vitest 2 -> 5) and checked: type-check, the unit tests, the production build and the
+  dev server with its WebSocket proxy in a real browser. `npm audit` now reports no
+  vulnerabilities. vitest 5 needs Node >= 22.12; CI runs Node 22.
 - **The UI has no end-to-end browser test.** The game, the counters, the buffers and the
   message parsing are pure modules covered by vitest; drawing and the WebSocket wiring
   were checked by running the stack and looking at screenshots.
