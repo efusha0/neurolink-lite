@@ -119,3 +119,30 @@ The 2 s analysis window is not part of these numbers.
 | S007 run 12, 60 s, 200 ms chunks | stream_to_pred | 225 | 79.5 | 53.2 | 163.6 | 165.7 | 168.5 |
 | S007 run 12, 60 s, 200 ms chunks | pred_to_ws | 225 | 0.5 | 0.4 | 0.7 | 2.1 | 3.1 |
 | S007 run 12, 60 s, 200 ms chunks | end_to_end | 225 | 80.3 | 54.1 | 164.9 | 167.1 | 169.8 |
+
+## Behavioural latency (reaction to the cue)
+
+`cross/eegnet/causal`, pseudo-online outputs of 105 held-out subjects.
+Time from the onset of a left/right trial (4.1 s long) to the end of the first
+2 s window whose smoothed prediction is the trial's class.
+Reached = share of trials in which that happens before the trial ends.
+Median (all) counts trials
+never reached as infinitely late (- when at least half are never reached); p25 to
+p90 are over the reached trials only. Within 1/2/3 s = share of all trials reached
+by then. In 18.5 % of all trials the last window before the cue already showed
+the coming class above the threshold; that is carry-over from rest, not a reaction,
+and the "not already right" rows leave those trials out.
+
+| Data | Condition | Trials | Reached (%) | Median, all (s) | p25 (s) | Median, reached (s) | p75 (s) | p90 (s) | Within 1 s (%) | Within 2 s (%) | Within 3 s (%) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| All 105 subjects | right class, above threshold | 4725 | 38.9 | - | 0.15 | 0.45 | 2.00 | 3.02 | 23.5 | 29.2 | 35.0 |
+| All 105 subjects | same, output not already right at the cue | 3853 | 25.9 | - | 0.80 | 1.80 | 2.70 | 3.50 | 7.9 | 14.7 | 21.3 |
+| All 105 subjects | right class, threshold ignored | 4725 | 83.7 | 0.25 | 0.10 | 0.20 | 0.90 | 2.35 | 64.2 | 72.4 | 80.0 |
+| S007, all runs | right class, above threshold | 45 | 84.4 | 1.45 | 0.20 | 1.17 | 1.93 | 2.76 | 35.6 | 64.4 | 77.8 |
+| S007, all runs | same, output not already right at the cue | 33 | 78.8 | 2.00 | 1.16 | 1.65 | 2.46 | 3.02 | 12.1 | 51.5 | 69.7 |
+| S007, all runs | right class, threshold ignored | 45 | 100.0 | 0.25 | 0.15 | 0.25 | 1.20 | 2.10 | 71.1 | 86.7 | 100.0 |
+| S007, run 12 | right class, above threshold | 15 | 93.3 | 1.65 | 1.10 | 1.52 | 1.93 | 2.32 | 20.0 | 73.3 | 93.3 |
+| S007, run 12 | same, output not already right at the cue | 12 | 91.7 | 1.67 | 1.30 | 1.65 | 2.12 | 2.35 | 0.0 | 66.7 | 91.7 |
+| S007, run 12 | right class, threshold ignored | 15 | 100.0 | 0.35 | 0.17 | 0.35 | 1.17 | 1.69 | 66.7 | 100.0 | 100.0 |
+
+First above-threshold output of a trial, all subjects: right class in 34.5 % of trials, wrong class in 20.3 %, none at all in 45.2 %.
