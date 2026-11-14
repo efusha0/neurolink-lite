@@ -225,6 +225,48 @@ is the share of all trials of the row.
   output of a trial is the right class in 34.5 % of trials, the wrong class in
   20.3 %, and there is none in 45.2 %.
 
+### Browser UI
+
+![The UI during a rest period: the decoder is 89 % sure of "left" and the cursor moves although nothing is being imagined](docs/ui.png)
+
+The page (Vite + TypeScript + Canvas, no framework) shows what the decoder does and, next
+to it, what it should have done:
+
+- **Cursor and target.** The cursor moves along a line with velocity
+  (p_right - p_left) / travel time while the prediction is above the confidence threshold,
+  and stands still otherwise.
+- **Class probability bar** with the threshold drawn in.
+- **True label vs prediction.** The state of the recording (rest / left / right) beside the
+  decoder output, with a verdict for the current window.
+- **Filtered EEG** of C3, Cz and C4 (the last 8 s), shaded by the true cue.
+- **Counters** for the session: game score, accuracy during cues, share of rest windows
+  that move the cursor, pipeline latency.
+
+**The target game follows the recording.** Nobody is steering, so the user cannot pick a
+target. When a trial starts the cursor returns to the centre and the target is the wall
+on the cued side; reaching it before the trial ends (4.1 s) is a hit, reaching the other
+wall is a wrong-side hit, otherwise the trial is a timeout.
+
+The only free parameter is the cursor speed. It was chosen on runs 4 and 8 of the demo
+subject only, by simulating the game on the pseudo-online outputs for a grid of travel
+times fixed beforehand and taking the one with the most hits minus wrong-side hits (ties
+go to the slower cursor). That gave a travel time of 1 s. The result on the replayed
+run 12 is reported as it came out:
+
+| Data | Trials | Hits | Wrong side | Timeouts |
+|---|---:|---:|---:|---:|
+| S007, runs 4 and 8 (used to choose the speed) | 30 | 14 (46.7 %) | 2 | 14 |
+| S007, run 12 (the demo) | 15 | 12 (80.0 %) | 0 | 3 |
+| Mean of 105 subjects, all runs, same speed | 45 each | 19.6 % | 7.0 % | 73.4 % |
+
+The demo run happens to be the better part of this subject's data (80.0 % of targets
+against 46.7 % on the two runs the speed was chosen on); that is how the split fell, not
+a choice. For the average subject the game is mostly timeouts: 0 of 105 subjects hit
+70 % of their targets over all three runs. A hit takes a median of 3.3 s of the 4.1 s
+trial. The live UI agrees with the simulation: over one pass of run 12 in the browser it
+showed 12 hits, no wrong-side hit and 2 timeouts in the 14 trials it saw, 89 % of cue
+windows correct, and the cursor moving during 54 % of rest windows.
+
 ## How to run
 
 ```bash
@@ -252,6 +294,7 @@ uv run neurolink stream                       # terminal 1: replay the demo run 
 uv run neurolink serve                        # terminal 2: classifier + WebSocket server
 uv run neurolink latency                      # end-to-end latency measurement
 uv run neurolink behavioural-latency          # reaction to the cue, from pseudo-online outputs
+uv run neurolink game-speed                   # cursor speed for the UI, from runs 4 and 8
 ```
 
 `pseudo-online` trains every candidate model and takes a while on a CPU; its results are
@@ -273,12 +316,7 @@ npm install
 npm run dev        # then open http://localhost:5173
 ```
 
-The page shows the cursor and the cued target, the smoothed class probabilities with the
-confidence threshold, the true label next to the prediction, three filtered EEG traces and
-running counters (game score, accuracy during cues, false commands at rest, latency).
-The cursor speed was chosen on runs 4 and 8 of the demo subject only
-(`uv run neurolink game-speed`); on the replayed run 12 the game then scores 12 of 15 hits,
-against a mean of 19.6 % hits over all 105 subjects. See `results/RESULTS.md`.
+What the page shows and how the game is scored: see "Browser UI" above.
 
 ## Development
 

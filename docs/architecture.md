@@ -223,3 +223,10 @@ decisions that are not obvious from the code.
   The UI prints the best-case and the average numbers under the game (from `/info`).
 - **Serving the built UI from FastAPI is left to Phase 6.** In Phase 5 the Vite dev
   server proxies `/ws`, `/info`, `/health` and `/latency` to `neurolink serve`.
+- **The live game agrees with the simulation.** One pass of run 12 through streamer,
+  server and browser (headless Chrome) showed 12 hits, no wrong-side hit and 2 timeouts in
+  the 14 trials the page saw, median 3.3 s to a hit; the simulation gives 12 hits and 3
+  timeouts in 15 trials, median 3.3 s. The page joined after the first trial had begun.
+- **The UI has no end-to-end browser test.** The game, the counters, the buffers and the
+  message parsing are pure modules covered by vitest; drawing and the WebSocket wiring
+  were checked by running the stack and looking at screenshots.
