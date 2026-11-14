@@ -39,6 +39,7 @@ from neurolink.config import (
     CACHE_DIR,
     MOTOR_CORTEX_CHANNELS,
     RAW_DIR,
+    SFREQ,
     PreprocessConfig,
     RealtimeConfig,
 )
@@ -51,8 +52,11 @@ from neurolink.realtime.pseudo_online import (
     Recording,
     load_recordings,
     make_windows,
+    reaction_stats,
+    reaction_times,
     rest_threshold,
     smooth_sequence,
+    trials_from_labels,
     window_metrics,
 )
 
@@ -440,3 +444,107 @@ def resummarize(previous: dict[str, Any], arrays: dict[str, NDArray[Any]]) -> di
     )
     summary["config"] = config
     return summary
+
+
+REACTION_GRID_S = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0)
+_REACTION_KEYS = ("correct_active", "correct", "first_active")
+
+
+def _reaction_block(parts: list[dict[str, NDArray[np.float64]]]) -> dict[str, Any]:
+    merged = {k: np.concatenate([p[k] for p in parts]) for k in parts[0]}
+    block: dict[str, Any] = {k: reaction_stats(merged[k], REACTION_GRID_S) for k in _REACTION_KEYS}
+    # Trials whose output was already right and above threshold when the cue came are
+    # carry-over from rest, not reactions: report the rest of the trials separately.
+    already = merged["already_correct_active"] == 1.0
+    block["correct_active_change"] = reaction_stats(
+        merged["correct_active"][~already], REACTION_GRID_S
+    )
+    block["already_correct_active_share"] = float(already.mean())
+    wrong = merged["first_active_wrong"]
+    block["n_trials"] = len(wrong)
+    block["never_active_share"] = float(np.isnan(wrong).mean())
+    block["first_command_wrong_share"] = float((wrong == 1.0).mean())
+    block["first_command_right_share"] = float((wrong == 0.0).mean())
+    return block
+
+
+def behavioural_latency(
+    arrays: dict[str, NDArray[Any]],
+    summary: dict[str, Any],
+    recording_loader: RecordingLoader,
+    candidate: str,
+    demo_subject: int | None = None,
+) -> dict[str, Any]:
+    """Reaction to the cue: time from trial onset to the first right, above-threshold output.
+
+    Uses the stored smoothed outputs of a cross-subject ``candidate`` (each subject decoded
+    by the fold model that held it out, with that fold's threshold) and the trial onsets
+    of the recordings. See :func:`neurolink.realtime.pseudo_online.reaction_times`.
+    """
+    if not candidate.startswith("cross/"):
+        raise ValueError("behavioural latency is defined for cross-subject candidates")
+    cfg = summary["config"]
+    sfreq = SFREQ
+    window, step = round(cfg["window_s"] * sfreq), round(cfg["step_s"] * sfreq)
+    fold_of = {int(s): int(k) for s, k in summary["fold_of"].items()}
+    thresholds = summary["thresholds"][candidate]
+    subject, run, label = arrays["subject"], arrays["run"], arrays["label"]
+
+    per_subject: dict[int, list[dict[str, NDArray[np.float64]]]] = {}
+    demo_test_run: list[dict[str, NDArray[np.float64]]] = []
+    for s in sorted(fold_of):
+        recs = recording_loader(s)
+        if recs is None:
+            raise RuntimeError(f"S{s:03d} has stored outputs but no valid recording")
+        smooth = arrays[f"smooth::{candidate}/fold{fold_of[s]}"]
+        for rec in recs:
+            mask = (subject == s) & (run == rec.run)
+            ends = window + step * np.arange(int(mask.sum()), dtype=np.int64)
+            # The stored windows must be the windows of this recording.
+            if (
+                len(ends) == 0
+                or ends[-1] > len(rec.sample_labels)
+                or not np.array_equal(rec.sample_labels[ends - 1], label[mask])
+            ):
+                raise RuntimeError(f"stored windows do not match S{s:03d} run {rec.run}")
+            times = reaction_times(
+                ends, smooth[mask], trials_from_labels(rec.sample_labels),
+                thresholds[fold_of[s]], rec.sfreq,
+            )  # fmt: skip
+            per_subject.setdefault(s, []).append(times)
+            if s == demo_subject and rec.run == TEST_RUN:
+                demo_test_run.append(times)
+
+    out: dict[str, Any] = {
+        "candidate": candidate,
+        "definition": (
+            "seconds from the onset of a left/right trial to the end of the first window "
+            "whose smoothed prediction is the trial's class with confidence >= threshold "
+            "(correct_active); 'correct_active_change' leaves out the trials whose last "
+            "window before the onset already showed that (carry-over from rest); 'correct' "
+            "ignores the threshold; 'first_active' is the first above-threshold output of "
+            "either class"
+        ),
+        "window_s": cfg["window_s"],
+        "step_s": cfg["step_s"],
+        "smoothing_alpha": cfg["smoothing_alpha"],
+        "n_subjects": len(per_subject),
+        "all_subjects": _reaction_block([t for parts in per_subject.values() for t in parts]),
+    }
+    reached = [
+        float(np.mean(~np.isnan(np.concatenate([t["correct_active"] for t in parts]))))
+        for parts in per_subject.values()
+    ]
+    out["reached_share_per_subject"] = {
+        "mean": float(np.mean(reached)),
+        "median": float(np.median(reached)),
+        "min": float(np.min(reached)),
+        "max": float(np.max(reached)),
+    }
+    if demo_subject is not None and demo_subject in per_subject:
+        out["demo_subject"] = {
+            "subject": demo_subject,
+            "all_runs": _reaction_block(per_subject[demo_subject]),
+            f"run_{TEST_RUN}": _reaction_block(demo_test_run),
+        }
+    return out

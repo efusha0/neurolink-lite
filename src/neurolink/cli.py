@@ -542,6 +542,66 @@ def latency(
     typer.echo(f"wrote {save_realtime(name, result, results_dir)}")
 
 
+@app.command(name="behavioural-latency")
+def behavioural_latency(
+    raw_dir: Path = typer.Option(RAW_DIR),
+    cache_dir: Path = typer.Option(CACHE_DIR),
+    results_dir: Path = typer.Option(RESULTS_DIR),
+    verbose: bool = typer.Option(False, "--verbose", "-v"),
+) -> None:
+    """Reaction to the cue: time until the demo model's output is right and above threshold."""
+    import json
+
+    from neurolink.config import MOTOR_IMAGERY_RUNS
+    from neurolink.eval import online_eval
+    from neurolink.eval.report import (
+        BEHAVIOURAL_JSON,
+        DEMO_MODEL_JSON,
+        PSEUDO_ONLINE_DIR,
+        PSEUDO_ONLINE_JSON,
+        load_realtime,
+        save_realtime,
+    )
+    from neurolink.realtime.demo_model import DEMO_CANDIDATE
+    from neurolink.realtime.pseudo_online import load_recordings
+
+    _setup_logging(verbose)
+    windows_path = cache_dir / "pseudo_online_windows.npz"
+    summary_path = results_dir / PSEUDO_ONLINE_DIR / PSEUDO_ONLINE_JSON
+    if not (windows_path.exists() and summary_path.exists()):
+        typer.secho(
+            f"needs {windows_path} and {summary_path}; run `neurolink pseudo-online` first.",
+            err=True,
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1)
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    keys = ("subject", "run", "label")
+    with np.load(windows_path) as npz:
+        arrays = {
+            k: npz[k] for k in npz.files if k in keys or k.startswith(f"smooth::{DEMO_CANDIDATE}/")
+        }
+    trained = load_realtime(DEMO_MODEL_JSON, results_dir)
+    demo_subject = int(trained["demo_subject"]) if trained is not None else None
+    result = online_eval.behavioural_latency(
+        arrays,
+        summary,
+        lambda s: load_recordings(s, MOTOR_IMAGERY_RUNS, raw_dir),
+        DEMO_CANDIDATE,
+        demo_subject,
+    )
+    blocks = {"all subjects": result["all_subjects"]}
+    if "demo_subject" in result:
+        blocks[f"S{demo_subject:03d} run 12"] = result["demo_subject"]["run_12"]
+    for name, block in blocks.items():
+        st = block["correct_active"]
+        typer.echo(
+            f"{name}: reached in {100 * st['reached_share']:.1f} % of {st['n_trials']} trials, "
+            f"median of reached {st['quantiles_reached_s']['p50']:.2f} s"
+        )
+    typer.echo(f"wrote {save_realtime(BEHAVIOURAL_JSON, result, results_dir)}")
+
+
 @app.command()
 def demo() -> None:
     """One-command demo: streamer + classifier + server + browser UI (Phase 6)."""

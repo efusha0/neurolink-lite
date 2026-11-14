@@ -11,7 +11,12 @@ from neurolink.config import MOTOR_CORTEX_CHANNELS, SFREQ, PreprocessConfig, Rea
 from neurolink.data.cache import cache_key
 from neurolink.data.loader import ValidationReport, standardize_channel_names
 from neurolink.data.pipeline import build_dataset
-from neurolink.eval.online_eval import resummarize, run_experiment, summarize
+from neurolink.eval.online_eval import (
+    behavioural_latency,
+    resummarize,
+    run_experiment,
+    summarize,
+)
 from neurolink.eval.report import _nan_to_none, save_pseudo_online
 from neurolink.models.base import Classifier
 from neurolink.models.csp_lda import make_csp_lda
@@ -20,11 +25,15 @@ from neurolink.realtime.pseudo_online import (
     OUTSIDE,
     REST,
     Recording,
+    Trial,
     make_windows,
+    reaction_stats,
+    reaction_times,
     recording_from_raw,
     rest_threshold,
     sample_labels_from_annotations,
     smooth_sequence,
+    trials_from_labels,
     window_labels,
     window_metrics,
 )
@@ -347,3 +356,74 @@ def test_demo_model_rejects_zero_phase_data_and_unknown_subjects() -> None:
     )
     with pytest.raises(ValueError, match="not a valid subject"):
         train_demo_model(9, seed=0, n_splits=2, dataset=causal, maker=make_csp_lda)
+
+
+# ------------------------------------------------------------------ reaction to the cue
+def test_trials_from_labels_lists_left_right_segments() -> None:
+    labels = np.array([OUTSIDE, REST, REST, 1, 1, 1, REST, 0, 0], dtype=np.int8)
+    assert trials_from_labels(labels) == [Trial(3, 6, 1), Trial(7, 9, 0)]
+    assert trials_from_labels(np.zeros(0, dtype=np.int8)) == []
+    assert trials_from_labels(np.array([0, 0], dtype=np.int8)) == [Trial(0, 2, 0)]
+
+
+def test_reaction_times_on_a_hand_made_run() -> None:
+    labels = np.array([REST] * 400 + [1] * 656 + [REST] * 344 + [0] * 600, dtype=np.int8)
+    ends = 320 + 40 * np.arange(43)  # 320 ... 2000
+    p = np.full(len(ends), 0.4)
+    # Trial A ("right", samples 400-1055): weakly right from the first window, confidently
+    # right from the window ending at 560.
+    p[(ends > 400) & (ends < 560)] = 0.6
+    p[(ends >= 560) & (ends <= 1056)] = 0.9
+    # Rest before trial B ends on a confident "left"; during trial B ("left", from 1400)
+    # the output is a confident "right" throughout.
+    p[ends == 1400] = 0.1
+    p[ends > 1400] = 0.9
+    out = reaction_times(ends, p, trials_from_labels(labels), threshold=0.7, sfreq=160.0)
+
+    np.testing.assert_allclose(out["correct"], [0.25, np.nan])
+    np.testing.assert_allclose(out["correct_active"], [1.0, np.nan])
+    np.testing.assert_allclose(out["first_active"], [1.0, 0.25])
+    np.testing.assert_allclose(out["first_active_wrong"], [0.0, 1.0])
+    # Only trial B starts with the output already on its class and above the threshold.
+    np.testing.assert_allclose(out["already_correct_active"], [0.0, 1.0])
+
+
+def test_reaction_stats_counts_unreached_trials_as_infinitely_late() -> None:
+    st = reaction_stats(np.array([1.0, np.nan, 2.0, 3.0]), grid_s=(1.0, 2.0, 3.0))
+    assert st["n_trials"] == 4 and st["reached_share"] == 0.75
+    assert st["median_all_trials_s"] == 2.5
+    assert st["quantiles_reached_s"]["p50"] == 2.0  # type: ignore[index]
+    assert st["reached_by"] == {"1": 0.25, "2": 0.5, "3": 0.75}
+    mostly_never = reaction_stats(np.array([np.nan, np.nan, 1.0]), grid_s=(1.0,))
+    assert np.isnan(mostly_never["median_all_trials_s"])  # type: ignore[call-overload]
+    assert reaction_stats(np.zeros(0), grid_s=(1.0,)) == {"n_trials": 0}
+
+
+def test_behavioural_latency_uses_held_out_outputs_and_real_onsets(experiment) -> None:  # type: ignore[no-untyped-def]
+    summary, store = experiment
+    arrays = store.arrays()
+    key = "cross/csp_lda/causal"
+    result = behavioural_latency(arrays, summary, fake_recordings, key, demo_subject=3)
+
+    everyone = result["all_subjects"]
+    assert everyone["n_trials"] == 4 * 3 * 10 and result["n_subjects"] == 4
+    assert result["demo_subject"]["all_runs"]["n_trials"] == 30
+    assert result["demo_subject"]["run_12"]["n_trials"] == 10
+    shares = [everyone[k] for k in ("never_active_share", "first_command_wrong_share",
+                                    "first_command_right_share")]  # fmt: skip
+    assert sum(shares) == pytest.approx(1.0)
+    # The synthetic rhythm is easy: almost every trial ends up decoded correctly at some
+    # point within its 4.1 s.
+    assert everyone["correct"]["reached_share"] > 0.9
+    assert 0.0 < everyone["correct"]["median_all_trials_s"] < 4.1
+    # Trials that start with the output already right are left out of the "change" rows.
+    change = everyone["correct_active_change"]
+    kept = round((1 - everyone["already_correct_active_share"]) * everyone["n_trials"])
+    assert change["n_trials"] == kept <= everyone["n_trials"]
+
+    with pytest.raises(ValueError, match="cross-subject"):
+        behavioural_latency(arrays, summary, fake_recordings, "subject/csp_lda/causal")
+    broken = dict(arrays)
+    broken["label"] = np.roll(arrays["label"], 1)
+    with pytest.raises(RuntimeError, match="do not match"):
+        behavioural_latency(broken, summary, fake_recordings, key)

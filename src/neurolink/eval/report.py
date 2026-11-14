@@ -133,6 +133,7 @@ def write_markdown_table(results_dir: Path = RESULTS_DIR) -> Path:
         ]
     lines += pseudo_online_markdown(results_dir)
     lines += realtime_markdown(results_dir)
+    lines += behavioural_markdown(results_dir)
     path = results_dir / RESULTS_MD
     path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     return path
@@ -217,6 +218,7 @@ def pseudo_online_markdown(results_dir: Path = RESULTS_DIR) -> list[str]:
 REALTIME_DIR = "realtime"
 DEMO_MODEL_JSON = "demo_model.json"
 LATENCY_JSON = "latency.json"
+BEHAVIOURAL_JSON = "behavioural_latency.json"
 
 
 def save_realtime(name: str, payload: dict[str, Any], results_dir: Path = RESULTS_DIR) -> Path:
@@ -325,4 +327,73 @@ def realtime_markdown(results_dir: Path = RESULTS_DIR) -> list[str]:
                 )
                 lines.append(f"| {name} | {stage} | {row['n']:.0f} | {cells} |")
         lines.append("")
+    return lines
+
+
+def _sec(value: float | None) -> str:
+    return "-" if value is None else f"{value:.2f}"
+
+
+def _reaction_rows(name: str, block: dict[str, Any]) -> list[str]:
+    labels = {
+        "correct_active": "right class, above threshold",
+        "correct_active_change": "same, output not already right at the cue",
+        "correct": "right class, threshold ignored",
+    }
+    rows = []
+    for key, label in labels.items():
+        st = block[key]
+        q, by = st["quantiles_reached_s"], st["reached_by"]
+        rows.append(
+            f"| {name} | {label} | {st['n_trials']} | {_pct1(st['reached_share'])} "
+            f"| {_sec(st['median_all_trials_s'])} | {_sec(q['p25'])} | {_sec(q['p50'])} "
+            f"| {_sec(q['p75'])} | {_sec(q['p90'])} | {_pct1(by['1'])} | {_pct1(by['2'])} "
+            f"| {_pct1(by['3'])} |"
+        )
+    return rows
+
+
+def behavioural_markdown(results_dir: Path = RESULTS_DIR) -> list[str]:
+    """Markdown section for the reaction-to-cue measurement, if present."""
+    data = load_realtime(BEHAVIOURAL_JSON, results_dir)
+    if data is None:
+        return []
+    everyone = data["all_subjects"]
+    lines = [
+        "## Behavioural latency (reaction to the cue)",
+        "",
+        f"`{data['candidate']}`, pseudo-online outputs of {data['n_subjects']} held-out subjects.",
+        "Time from the onset of a left/right trial (4.1 s long) to the end of the first",
+        f"{data['window_s']:g} s window whose smoothed prediction is the trial's class.",
+        "Reached = share of trials in which that happens before the trial ends.",
+        "Median (all) counts trials",
+        "never reached as infinitely late (- when at least half are never reached); p25 to",
+        "p90 are over the reached trials only. Within 1/2/3 s = share of all trials reached",
+        "by then. In"
+        f" {_pct1(everyone['already_correct_active_share'])} % of all trials the last window"
+        " before the cue already showed",
+        "the coming class above the threshold; that is carry-over from rest, not a reaction,",
+        'and the "not already right" rows leave those trials out.',
+        "",
+        "| Data | Condition | Trials | Reached (%) | Median, all (s) | p25 (s) "
+        "| Median, reached (s) | p75 (s) | p90 (s) | Within 1 s (%) | Within 2 s (%) "
+        "| Within 3 s (%) |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        *_reaction_rows(f"All {data['n_subjects']} subjects", everyone),
+    ]
+    demo = data.get("demo_subject")
+    if demo is not None:
+        subject = f"S{demo['subject']:03d}"
+        lines += _reaction_rows(f"{subject}, all runs", demo["all_runs"])
+        run_keys = [k for k in demo if k.startswith("run_")]
+        for key in run_keys:
+            lines += _reaction_rows(f"{subject}, run {key.removeprefix('run_')}", demo[key])
+    lines += [
+        "",
+        f"First above-threshold output of a trial, all subjects: right class in"
+        f" {_pct1(everyone['first_command_right_share'])} % of trials, wrong class in"
+        f" {_pct1(everyone['first_command_wrong_share'])} %, none at all in"
+        f" {_pct1(everyone['never_active_share'])} %.",
+        "",
+    ]
     return lines

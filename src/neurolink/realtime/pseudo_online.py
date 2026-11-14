@@ -8,6 +8,7 @@ This is the honest counterpart of the offline, cue-aligned accuracy.
 
 from __future__ import annotations
 
+import itertools
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -205,4 +206,104 @@ def window_metrics(
         "n_inside": float((imagery & inside).sum()),
         "n_all": float(imagery.sum()),
         "n_rest": float(rest.sum()),
+    }
+
+
+# ------------------------------------------------------------- reaction to the cue
+@dataclass(frozen=True)
+class Trial:
+    """One left/right trial: samples ``[start, stop)`` carry ``label``."""
+
+    start: int
+    stop: int
+    label: int
+
+
+def trials_from_labels(sample_labels: NDArray[np.int8]) -> list[Trial]:
+    """Left/right trials of a run, in order, from its per-sample labels."""
+    if len(sample_labels) == 0:
+        return []
+    change = (np.flatnonzero(np.diff(sample_labels)) + 1).tolist()
+    bounds = [0, *change, len(sample_labels)]
+    return [
+        Trial(a, b, int(sample_labels[a]))
+        for a, b in itertools.pairwise(bounds)
+        if sample_labels[a] >= 0
+    ]
+
+
+def reaction_times(
+    ends: NDArray[np.int64],
+    p_smooth_right: NDArray[np.floating],
+    trials: Sequence[Trial],
+    threshold: float,
+    sfreq: float,
+) -> dict[str, NDArray[np.float64]]:
+    """How long after a cue the decoder output becomes right, per trial, in seconds.
+
+    Time runs from the trial onset to the end of the first window (ending during that
+    trial) that satisfies the condition; ``nan`` if no window of the trial does.
+
+    * ``correct_active``: smoothed prediction is the trial's class *and* its confidence
+      reaches ``threshold``, i.e. the cursor starts moving the right way.
+    * ``correct``: smoothed prediction is the trial's class, threshold ignored.
+    * ``first_active``: any class above the threshold (the first command of the trial).
+    * ``first_active_wrong``: 1.0 if that first command is the wrong class, 0.0 if it is
+      right, ``nan`` if the trial has no command.
+    * ``already_correct_active``: 1.0 if the last window ending *before* the onset already
+      showed the trial's class above the threshold. Such a trial needs no change of the
+      output: what follows is carry-over from rest, not a reaction to the cue.
+    """
+    p = np.asarray(p_smooth_right, dtype=np.float64)
+    pred = (p >= 0.5).astype(np.int64)
+    active = confidence(p) >= threshold
+    keys = ("correct_active", "correct", "first_active", "first_active_wrong")
+    out = {k: np.full(len(trials), np.nan) for k in keys}
+    out["already_correct_active"] = np.zeros(len(trials))
+    for i, trial in enumerate(trials):
+        before = np.flatnonzero(ends <= trial.start)
+        if len(before) and pred[before[-1]] == trial.label and active[before[-1]]:
+            out["already_correct_active"][i] = 1.0
+        # Windows whose last sample (index end - 1) lies in the trial.
+        idx = np.flatnonzero((ends > trial.start) & (ends <= trial.stop))
+        seconds = (ends[idx] - trial.start) / sfreq
+        right = pred[idx] == trial.label
+        for key, mask in (
+            ("correct_active", right & active[idx]),
+            ("correct", right),
+            ("first_active", active[idx]),
+        ):
+            hit = np.flatnonzero(mask)
+            if len(hit):
+                out[key][i] = seconds[hit[0]]
+        first = np.flatnonzero(active[idx])
+        if len(first):
+            out["first_active_wrong"][i] = 0.0 if right[first[0]] else 1.0
+    return out
+
+
+def reaction_stats(seconds: NDArray[np.float64], grid_s: Sequence[float]) -> dict[str, object]:
+    """Distribution of per-trial reaction times; ``nan`` entries are trials never reached.
+
+    ``median_all_trials_s`` counts unreached trials as infinitely late (``nan`` when at
+    least half of the trials are never reached); the quantiles are over reached trials.
+    ``reached_by`` is the cumulative share of *all* trials reached within each grid time.
+    """
+    t = np.asarray(seconds, dtype=np.float64)
+    reached = t[~np.isnan(t)]
+    n = len(t)
+    if n == 0:
+        return {"n_trials": 0}
+    median_all = float(np.median(np.where(np.isnan(t), np.inf, t)))
+    quantiles = (10, 25, 50, 75, 90)
+    return {
+        "n_trials": n,
+        "reached_share": len(reached) / n,
+        "median_all_trials_s": median_all if np.isfinite(median_all) else float("nan"),
+        "quantiles_reached_s": {
+            f"p{q}": float(np.percentile(reached, q)) if len(reached) else float("nan")
+            for q in quantiles
+        },
+        "mean_reached_s": float(reached.mean()) if len(reached) else float("nan"),
+        "reached_by": {f"{g:g}": float((reached <= g).sum() / n) for g in grid_s},
     }

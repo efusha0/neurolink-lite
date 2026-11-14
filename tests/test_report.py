@@ -6,8 +6,10 @@ from pathlib import Path
 from neurolink.data.cache import Dataset
 from neurolink.eval.protocols import cross_subject_cv, within_subject_cv
 from neurolink.eval.report import (
+    BEHAVIOURAL_JSON,
     DEMO_MODEL_JSON,
     LATENCY_JSON,
+    behavioural_markdown,
     load_realtime,
     load_results,
     realtime_markdown,
@@ -104,3 +106,41 @@ def test_realtime_sections_appear_in_the_markdown_table(tmp_path: Path) -> None:
     line = "| S007 run 12, 120 s, 50 ms chunks | end_to_end | 464 | 4.0 | 3.5 | 6.2 | 8.0 | - |"
     assert line in md
     assert md.index("stream_to_pred | 464") < md.index("end_to_end | 464")
+
+
+def test_behavioural_latency_section(tmp_path: Path) -> None:
+    assert behavioural_markdown(tmp_path) == []
+
+    def stats(n: int, median_all: float) -> dict[str, object]:
+        return {
+            "n_trials": n, "reached_share": 0.5, "median_all_trials_s": median_all,
+            "quantiles_reached_s": {"p10": 0.1, "p25": 0.8, "p50": 1.8, "p75": 2.7, "p90": 3.5},
+            "reached_by": {"1": 0.1, "2": 0.25, "3": 0.4},
+        }  # fmt: skip
+
+    def block(n: int) -> dict[str, object]:
+        return {
+            "correct_active": stats(n, float("nan")), "correct_active_change": stats(n - 2, 1.65),
+            "correct": stats(n, 0.25), "already_correct_active_share": 0.185,
+            "first_command_right_share": 0.345, "first_command_wrong_share": 0.203,
+            "never_active_share": 0.452,
+        }  # fmt: skip
+
+    save_realtime(
+        BEHAVIOURAL_JSON,
+        {
+            "candidate": "cross/eegnet/causal", "n_subjects": 105, "window_s": 2.0,
+            "all_subjects": block(4725),
+            "demo_subject": {"subject": 7, "all_runs": block(45), "run_12": block(15)},
+        },
+        tmp_path,
+    )  # fmt: skip
+    md = (tmp_path / "RESULTS.md").read_text(encoding="utf-8")
+    assert "## Behavioural latency (reaction to the cue)" in md
+    assert "In 18.5 % of all trials" in md
+    row = "| S007, run 12 | same, output not already right at the cue | 13 | 50.0 | 1.65 |"
+    assert row in md
+    assert (
+        "| All 105 subjects | right class, above threshold | 4725 | 50.0 | - | 0.80 | 1.80 |" in md
+    )
+    assert "right class in 34.5 % of trials, wrong class in 20.3 %, none at all in 45.2 %" in md
