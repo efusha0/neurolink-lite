@@ -75,6 +75,7 @@ predictions (the "Midas touch" problem of BCIs).
 - Code, comments, and README in English. Communicate with me in Turkish.
 - Small, meaningful commits (conventional commits).
 - When unsure, don't assume — ask.
+- Push to GitHub at the end of every phase without asking.
 
 ## Progress
 Update this checklist when I approve a phase.
