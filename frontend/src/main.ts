@@ -2,13 +2,28 @@
 
 import { StateTimeline, TraceBuffer, pushEeg } from "./buffers";
 import { connect, websocketUrl, type ConnectionStatus } from "./connection";
-import { advance, createGame, median, onPrediction } from "./game";
+import {
+  advance,
+  createGame,
+  interrupt,
+  median,
+  onPrediction,
+  resetCounters,
+  settle,
+} from "./game";
 import { COLORS, classColor, drawArena, drawEeg, fitCanvas } from "./render";
+import {
+  createSession,
+  describeHistory,
+  describePass,
+  markIncomplete,
+  observe,
+} from "./session";
 import { createStats, formatPercent, share, updateStats } from "./stats";
 import type { InfoResponse, PredictionMessage, ServerMessage } from "./types";
 
 /** Used only until `/info` answers; the server's values are authoritative. */
-const DEFAULTS = { travelTimeS: 1.0, displayRateHz: 40 };
+const DEFAULTS = { travelTimeS: 1.0, stepS: 0.25, displayRateHz: 40 };
 const EEG_SPAN_S = 8;
 const STALL_AFTER_MS = 3000;
 const LATENCY_WINDOW = 40;
@@ -37,6 +52,9 @@ const el = {
   gameHits: byId("game-hits"),
   gameTrials: byId("game-trials"),
   gameDetail: byId("game-detail"),
+  gamePass: byId("game-pass"),
+  gameHistory: byId("game-history"),
+  accTitle: byId("acc-title"),
   accTrial: byId("acc-trial"),
   accDetail: byId("acc-detail"),
   restActive: byId("rest-active"),
@@ -45,7 +63,8 @@ const el = {
   reset: byId<HTMLButtonElement>("reset"),
 };
 
-let game = createGame();
+const game = createGame();
+const session = createSession();
 let stats = createStats();
 const buffers = new Map<string, TraceBuffer>();
 const timeline = new StateTimeline();
@@ -59,12 +78,14 @@ let lastOutcomeAt = -Infinity;
 let latencies: number[] = [];
 let connection: ConnectionStatus = "connecting";
 let travelTimeS = DEFAULTS.travelTimeS;
+let stepS = DEFAULTS.stepS;
 let displayRateHz = DEFAULTS.displayRateHz;
 let infoLoaded = false;
 
 // ---------------------------------------------------------------------------- /info
 function showInfo(info: InfoResponse): void {
   if (typeof info.cursor_travel_time_s === "number") travelTimeS = info.cursor_travel_time_s;
+  if (typeof info.step_s === "number" && info.step_s > 0) stepS = info.step_s;
   if (typeof info.display_rate_hz === "number") displayRateHz = info.display_rate_hz;
   if (typeof info.threshold === "number") {
     const offset = 50 * (2 * info.threshold - 1); // |p_right - p_left| at the threshold
@@ -88,9 +109,16 @@ function showInfo(info: InfoResponse): void {
   const notes: string[] = [];
   if (ref !== undefined) {
     if (typeof ref.demo_run_hit_rate === "number") {
+      const rate = formatPercent(ref.demo_run_hit_rate);
+      const trials = ref.demo_run_trials;
       notes.push(
-        `This subject is a best case: offline, this run gives ${formatPercent(ref.demo_run_hit_rate)} hits` +
-          (typeof ref.demo_run_trials === "number" ? ` (${ref.demo_run_trials} trials).` : "."),
+        "This subject is a best case: in the offline simulation one full pass of this run gives " +
+          (typeof trials === "number"
+            ? `${Math.round(ref.demo_run_hit_rate * trials)} of ${trials} hits (${rate}).`
+            : `${rate} hits.`),
+      );
+      notes.push(
+        "The run is replayed in a loop; the counters above cover one pass and restart with the next.",
       );
     }
     if (typeof ref.mean_hit_rate === "number" && typeof ref.n_subjects === "number") {
@@ -156,6 +184,9 @@ function showCounters(): void {
   el.gameDetail.textContent =
     `wrong side ${game.wrong} · timeouts ${game.timeouts}` +
     (Number.isFinite(hitTime) ? ` · median time to hit ${hitTime.toFixed(1)} s` : "");
+  el.gamePass.textContent = describePass(session);
+  el.gameHistory.textContent = describeHistory(session);
+  el.accTitle.textContent = session.pass === null ? "Decoder, this session" : "Decoder, this pass";
   el.accTrial.textContent = formatPercent(share(stats.trialCorrect, stats.trialWindows));
   el.accDetail.textContent =
     `of ${stats.trialWindows} windows during a cue are correct` +
@@ -178,7 +209,17 @@ function handle(message: ServerMessage): void {
   }
   lastPrediction = message;
   lastPredictionAt = now;
-  onPrediction(game, message, travelTimeS);
+  // The game runs on stream time: each prediction moves the cursor by one decoder step,
+  // whether or not the page was drawn in between (see game.ts).
+  settle(game); // the last step of the previous prediction still belongs to its pass
+  const { gap, newPass } = observe(session, message, stepS, game);
+  if (gap) interrupt(game);
+  if (newPass) {
+    resetCounters(game);
+    lastOutcomeCount = 0;
+    stats = createStats();
+  }
+  onPrediction(game, message, travelTimeS, stepS);
   updateStats(stats, message);
   timeline.push(message.t, message.true);
   timeline.prune(message.t - EEG_SPAN_S - 2);
@@ -207,8 +248,9 @@ function showStatus(now: number): void {
 let previousFrame = performance.now();
 
 function frame(now: number): void {
-  // After a background tab the first frame would be huge; never integrate more than 0.5 s.
-  const dt = Math.min(0.5, (now - previousFrame) / 1000);
+  // Only for smooth drawing: `advance` never moves past the step the last prediction
+  // paid for, so frame timing (or a hidden tab without frames) cannot change the score.
+  const dt = (now - previousFrame) / 1000;
   previousFrame = now;
   advance(game, dt);
   if (game.outcomeCount !== lastOutcomeCount) {
@@ -240,10 +282,8 @@ function frame(now: number): void {
 
 // ----------------------------------------------------------------------------- start
 el.reset.addEventListener("click", () => {
-  const { x, v, target, resolved, elapsed } = game;
-  game = { ...createGame(), x, v, target, resolved, elapsed };
-  // A trial still in progress keeps running and will be counted when it ends.
-  if (target !== null && !resolved) game.trials = 1;
+  resetCounters(game); // a trial still in progress keeps running and counts when it ends
+  markIncomplete(session);
   lastOutcomeCount = 0;
   stats = createStats();
   latencies = [];

@@ -27,6 +27,11 @@ function parsePrediction(m: Record<string, unknown>): PredictionMessage | null {
     return null;
   }
   if (!isClassName(m.pred) || !isTrueLabel(m.true) || typeof m.active !== "boolean") return null;
+  // Optional, so that a page still works against a server that does not send it.
+  const replayPass = m.replay_pass ?? null;
+  if (replayPass !== null && !(isFiniteNumber(replayPass) && Number.isInteger(replayPass))) {
+    return null;
+  }
   return {
     type: "prediction",
     t: m.t,
@@ -36,6 +41,7 @@ function parsePrediction(m: Record<string, unknown>): PredictionMessage | null {
     confidence: m.confidence,
     active: m.active,
     sample_time: m.sample_time,
+    replay_pass: replayPass,
     latency_ms: { stream_to_pred: latency.stream_to_pred, pred_to_ws: latency.pred_to_ws },
   };
 }

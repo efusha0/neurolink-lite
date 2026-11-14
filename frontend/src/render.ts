@@ -107,7 +107,11 @@ export function drawArena(
   ctx.font = "600 14px system-ui, sans-serif";
   if (game.target === null) {
     ctx.fillStyle = COLORS.muted;
-    ctx.fillText("REST: no target. Any movement now is a false command.", width / 2, height - 14);
+    const caption =
+      game.cue === "left" || game.cue === "right"
+        ? `CUE: ${game.cue.toUpperCase()} hand. This trial began before the page was watching: not scored.`
+        : "REST: no target. Any movement now is a false command.";
+    ctx.fillText(caption, width / 2, height - 14);
   } else {
     ctx.fillStyle = classColor(game.target);
     ctx.fillText(`CUE: imagine the ${game.target.toUpperCase()} hand`, width / 2, height - 14);

@@ -12,6 +12,7 @@ const prediction = {
   confidence: 0.75,
   active: true,
   sample_time: 102.0,
+  replay_pass: null,
   latency_ms: { stream_to_pred: 12.5, pred_to_ws: 0.4 },
 };
 
@@ -21,6 +22,16 @@ describe("protocol", () => {
     expect(parseMessage(JSON.stringify(prediction))).toEqual(prediction);
     const unlabelled = parseMessage(JSON.stringify({ ...prediction, true: null }));
     expect(unlabelled?.type === "prediction" && unlabelled.true).toBeNull();
+  });
+
+  it("reads the replay pass and tolerates a server that does not send it", () => {
+    const third = parseMessage(JSON.stringify({ ...prediction, replay_pass: 3 }));
+    expect(third?.type === "prediction" && third.replay_pass).toBe(3);
+    const { replay_pass: _omitted, ...old } = prediction;
+    const parsed = parseMessage(JSON.stringify(old));
+    expect(parsed?.type === "prediction" && parsed.replay_pass).toBeNull();
+    expect(parseMessage(JSON.stringify({ ...prediction, replay_pass: "3" }))).toBeNull();
+    expect(parseMessage(JSON.stringify({ ...prediction, replay_pass: 1.5 }))).toBeNull();
   });
 
   it("parses the EEG message built by the server", () => {

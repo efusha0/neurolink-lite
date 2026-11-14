@@ -15,6 +15,11 @@ export interface PredictionMessage {
   active: boolean;
   /** LSL timestamp (s) of the newest sample in the analysis window. */
   sample_time: number;
+  /**
+   * Which pass of the looped recording this is (1, 2, ...); null when the server has no
+   * marker stream. The UI scores every pass on its own.
+   */
+  replay_pass: number | null;
   latency_ms: { stream_to_pred: number; pred_to_ws: number };
 }
 
@@ -45,6 +50,7 @@ export interface InfoResponse {
   demo_subject?: number;
   threshold?: number;
   window_s?: number;
+  /** Seconds between two predictions; one prediction moves the cursor for this long. */
   step_s?: number;
   n_train_subjects?: number;
   /** Seconds from the centre to a wall at full confidence (chosen on runs 4 and 8). */
