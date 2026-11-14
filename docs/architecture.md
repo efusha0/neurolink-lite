@@ -185,4 +185,5 @@ decisions that are not obvious from the code.
 - **The live session agrees with the pseudo-online numbers.** During the latency run
   (229 trial windows of S007 run 12 received over the WebSocket) the live system was right
   on 86.5 % of all trial windows; the pseudo-online evaluation of the same run gives
-  87.0 %. The two differ only in where the 0.25 s window grid starts.
+  87.0 %. The two differ in where the 0.25 s window grid starts and in the last
+  seconds of the 125 s run, which the 120 s session does not reach.

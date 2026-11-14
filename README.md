@@ -157,6 +157,10 @@ who is easy to decode:
 | S007, run 12 (the demo) | 100.0 % | 100.0 % | 87.0 % | 53.5 % | 64.2 % |
 | Average of 105 subjects | 66.0 % | 64.1 % | 61.0 % | 28.0 % | 28.7 % |
 
+Run 12 holds only 15 cue-aligned epochs and 129 windows inside a trial, so the S007 row is
+a coarse estimate (over all three runs the same model scores 97.8 % offline and 96.1 % /
+83.5 % pseudo-online for S007).
+
 What the demo shows is what the system does for one of the most decodable subjects.
 For a typical subject it is right about 61 % of the time, and for most subjects it is not
 usable as a controller. Even for S007 the cursor moves during about half of the rest
@@ -165,8 +169,8 @@ windows.
 ### Latency
 
 Measured with `neurolink latency`: streamer, classifier, server and a WebSocket client on
-one machine (Intel CPU with 16 logical cores, Windows, no GPU), 465 predictions over 120 s. Latency is counted from the LSL
-timestamp of the newest sample of a window.
+one machine (Intel CPU with 16 logical cores, Windows, no GPU), 465 predictions over
+120 s. Latency is counted from the LSL timestamp of the newest sample of a window.
 
 | Stage | p50 | p95 | p99 | max |
 |---|---:|---:|---:|---:|
@@ -178,7 +182,8 @@ The 2 s analysis window is not included: it is not delay of the pipeline, but it
 down the reaction to a change of intent (see "window alignment" above). Browser rendering
 is not included either. In this measurement every window ends on a chunk boundary (50 ms
 chunks, 250 ms step). When it does not, the prediction additionally waits for the chunk to
-complete: with 200 ms chunks the same measurement gives p50 54 ms and p95 165 ms end to end (225 predictions over 60 s).
+complete: with 200 ms chunks the same measurement gives p50 54 ms and p95 165 ms end to
+end (225 predictions over 60 s).
 
 ## How to run
 
