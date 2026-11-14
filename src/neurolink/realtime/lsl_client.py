@@ -7,24 +7,33 @@ import bisect
 import numpy as np
 from numpy.typing import NDArray
 
-from neurolink.realtime.streamer import EEG_STREAM, MARKER_STREAM
+from neurolink.realtime.streamer import EEG_STREAM, MARKER_STREAM, parse_marker
 
 
 class LabelTimeline:
-    """True state over time, built from marker events: ``label_at(t)`` = last marker <= t."""
+    """True state over time, built from marker events: ``label_at(t)`` = last marker <= t.
+
+    Each marker may also carry the replay pass it belongs to (``pass_at``).
+    """
 
     def __init__(self) -> None:
         self._times: list[float] = []
         self._labels: list[str] = []
+        self._passes: list[int | None] = []
 
-    def add(self, timestamp: float, label: str) -> None:
+    def add(self, timestamp: float, label: str, replay_pass: int | None = None) -> None:
         i = bisect.bisect_right(self._times, timestamp)
         self._times.insert(i, timestamp)
         self._labels.insert(i, label)
+        self._passes.insert(i, replay_pass)
 
     def label_at(self, timestamp: float) -> str | None:
         i = bisect.bisect_right(self._times, timestamp)
         return self._labels[i - 1] if i else None
+
+    def pass_at(self, timestamp: float) -> int | None:
+        i = bisect.bisect_right(self._times, timestamp)
+        return self._passes[i - 1] if i else None
 
 
 def _resolve(name: str, timeout: float):  # type: ignore[no-untyped-def]
@@ -91,7 +100,8 @@ class LslMarkerReader:
             sample, stamp = self._inlet.pull_sample(timeout=0.0)
             if sample is None:
                 return
-            self.timeline.add(float(stamp), str(sample[0]))
+            state, replay_pass = parse_marker(str(sample[0]))
+            self.timeline.add(float(stamp), state, replay_pass)
 
     def close(self) -> None:
         self._inlet.close_stream()

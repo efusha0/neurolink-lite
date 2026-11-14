@@ -41,8 +41,13 @@ def prediction_message(
     true_label: str | None,
     sample_time: float,
     stream_to_pred_ms: float,
+    replay_pass: int | None = None,
 ) -> dict[str, Any]:
-    """JSON-ready ``PredictionMessage`` (``pred_to_ws`` is filled in by the hub)."""
+    """JSON-ready ``PredictionMessage`` (``pred_to_ws`` is filled in by the hub).
+
+    ``replay_pass`` counts the passes of the looped recording (1, 2, ...); the UI scores
+    each pass separately.
+    """
     return {
         "type": "prediction",
         "t": t,
@@ -52,6 +57,7 @@ def prediction_message(
         "confidence": pred.confidence,
         "active": pred.active,
         "sample_time": sample_time,
+        "replay_pass": replay_pass,
         "latency_ms": {"stream_to_pred": stream_to_pred_ms, "pred_to_ws": 0.0},
     }
 
@@ -143,8 +149,12 @@ class DecodeWorker(threading.Thread):
             sample_time = float(stamps[p.end_sample - 1 - offset])
             latency_ms = (done - sample_time) * 1000.0
             self.tracker.add("stream_to_pred", latency_ms)
-            true = self.labels.timeline.label_at(sample_time) if self.labels else None
-            msg = prediction_message(p, sample_time - self._t0, true, sample_time, latency_ms)
+            timeline = self.labels.timeline if self.labels else None
+            true = timeline.label_at(sample_time) if timeline else None
+            replay_pass = timeline.pass_at(sample_time) if timeline else None
+            msg = prediction_message(
+                p, sample_time - self._t0, true, sample_time, latency_ms, replay_pass
+            )
             msg["_created"] = done
             self.emit(msg)
 

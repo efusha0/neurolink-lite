@@ -19,7 +19,12 @@ from neurolink.realtime.server import (
     eeg_message,
     prediction_message,
 )
-from neurolink.realtime.streamer import label_name, marker_events
+from neurolink.realtime.streamer import (
+    format_marker,
+    label_name,
+    marker_events,
+    parse_marker,
+)
 from tests.test_realtime_core import PowerModel
 
 SFREQ = 160.0
@@ -49,6 +54,13 @@ def test_marker_events_and_label_names() -> None:
         (0, "rest"), (2, "left"), (4, "rest"), (5, "right"), (6, "none"),
     ]  # fmt: skip
     assert marker_events(np.zeros(0, dtype=np.int8)) == []
+    # The heartbeat repeats the current state at a fixed interval, for late joiners.
+    assert marker_events(labels, heartbeat=3) == [
+        (0, "rest"), (2, "left"), (3, "left"), (4, "rest"), (5, "right"), (6, "none"),
+    ]  # fmt: skip
+    assert format_marker("left", 3) == "left|3"
+    assert parse_marker("left|3") == ("left", 3)
+    assert parse_marker("rest") == ("rest", None) and parse_marker("rest|x") == ("rest", None)
     assert [label_name(v) for v in (0, 1, REST, OUTSIDE)] == ["left", "right", "rest", "none"]
 
 
@@ -62,6 +74,10 @@ def test_label_timeline_returns_last_marker_before_time() -> None:
     assert tl.label_at(10.0) == "rest"
     assert tl.label_at(13.0) == "right"
     assert tl.label_at(99.0) == "left"
+    # Markers may carry the replay pass; it is looked up the same way.
+    assert tl.pass_at(13.0) is None
+    tl.add(20.0, "rest", replay_pass=2)
+    assert tl.pass_at(19.9) is None and tl.pass_at(20.0) == 2 and tl.label_at(21.0) == "rest"
 
 
 def test_latency_tracker_summary() -> None:
@@ -84,8 +100,10 @@ def test_message_builders_match_frontend_schema() -> None:
     assert msg == {
         "type": "prediction", "t": 2.0, "probs": {"left": 0.25, "right": 0.75},
         "pred": "right", "true": "right", "confidence": 0.75, "active": True,
-        "sample_time": 102.0, "latency_ms": {"stream_to_pred": 12.5, "pred_to_ws": 0.0},
+        "sample_time": 102.0, "replay_pass": None,
+        "latency_ms": {"stream_to_pred": 12.5, "pred_to_ws": 0.0},
     }  # fmt: skip
+    assert prediction_message(pred, 0.0, "left", 0.0, 0.0, replay_pass=4)["replay_pass"] == 4
     assert prediction_message(pred, 0.0, "none", 0.0, 0.0)["true"] is None
     eeg = eeg_message(1.0, ["C3", "C4"], np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]))
     assert eeg == {"type": "eeg", "t": 1.0, "channels": ["C3", "C4"],
@@ -96,7 +114,8 @@ def test_message_builders_match_frontend_schema() -> None:
 class FakeLabels:
     def __init__(self) -> None:
         self.timeline = LabelTimeline()
-        self.timeline.add(0.0, "right")
+        self.timeline.add(0.0, "right", replay_pass=1)
+        self.timeline.add(103.0, "right", replay_pass=2)
 
     def poll(self) -> None:
         pass
@@ -121,6 +140,7 @@ def test_worker_emits_predictions_with_timestamps_and_latency() -> None:
         assert m["t"] == pytest.approx((320 + 40 * k - 1) / SFREQ)
         assert m["latency_ms"]["stream_to_pred"] == pytest.approx(4.0, abs=1e-6)
         assert m["true"] == "right"
+        assert m["replay_pass"] == (1 if m["sample_time"] < 103.0 else 2)
     assert all(m["pred"] == "right" for m in preds[4:])
     assert worker.tracker.summary()["stream_to_pred"]["n"] == len(preds)
 
@@ -259,3 +279,8 @@ def test_lsl_replay_reaches_decoder_in_real_time() -> None:
     latency = [m["latency_ms"]["stream_to_pred"] for m in preds]
     assert 0.0 <= float(np.median(latency)) < 60.0
     assert {m["true"] for m in preds} <= {"rest", "right", None}
+    # The 4 s recording is looped: late predictions belong to the second pass, and thanks
+    # to the one-second heartbeat the state is known from the first prediction on.
+    passes = [m["replay_pass"] for m in preds]
+    assert passes == sorted(passes) and passes[0] == 1 and passes[-1] >= 2
+    assert all(m["true"] is not None for m in preds)

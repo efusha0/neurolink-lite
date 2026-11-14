@@ -5,8 +5,10 @@ Two outlets are created:
 * an EEG stream with the raw, unfiltered 64-channel signal in microvolts at 160 Hz, sent
   in small chunks at real-time pace, each sample stamped with the time it "was acquired";
 * a marker stream that announces the true state (``rest`` / ``left`` / ``right``) whenever
-  it changes. The classifier never reads it; it only feeds the "true label vs prediction"
-  indicator in the UI.
+  it changes, and repeats it once per second so that a client joining late learns the
+  state quickly. Each marker also carries the number of the replay pass (the recording is
+  looped), as ``"<state>|<pass>"``. The classifier never reads this stream; it only feeds
+  the "true label vs prediction" indicator and the per-pass score in the UI.
 """
 
 from __future__ import annotations
@@ -33,13 +35,30 @@ def label_name(label: int) -> str:
     return "rest" if label == REST else "none"
 
 
-def marker_events(sample_labels: NDArray[np.int8]) -> list[tuple[int, str]]:
-    """``(sample_index, label_name)`` at the start and at every change of the true state."""
+def marker_events(
+    sample_labels: NDArray[np.int8], heartbeat: int | None = None
+) -> list[tuple[int, str]]:
+    """``(sample_index, label_name)`` at the start and at every change of the true state.
+
+    With ``heartbeat`` the current state is also repeated every ``heartbeat`` samples.
+    """
     if len(sample_labels) == 0:
         return []
     change = np.flatnonzero(np.diff(sample_labels)) + 1
     idx = np.concatenate([[0], change])
+    if heartbeat is not None:
+        idx = np.union1d(idx, np.arange(0, len(sample_labels), heartbeat))
     return [(int(i), label_name(int(sample_labels[i]))) for i in idx]
+
+
+def format_marker(state: str, replay_pass: int) -> str:
+    return f"{state}|{replay_pass}"
+
+
+def parse_marker(text: str) -> tuple[str, int | None]:
+    """``"left|3"`` -> ``("left", 3)``; a bare state has no pass number."""
+    state, sep, number = text.partition("|")
+    return state, int(number) if sep and number.isdigit() else None
 
 
 class ReplayStreamer:
@@ -73,13 +92,17 @@ class ReplayStreamer:
         self._markers = pylsl.StreamOutlet(marker_info)
         self._clock = pylsl.local_clock
         self.n_sent = 0
+        self.n_passes = 0
+        """Replay passes started so far; the current pass number, counted from 1."""
 
     def run(self, stop: threading.Event | None = None, loop: bool = False) -> int:
         """Stream the recording once (or forever with ``loop``); returns samples sent."""
         data = self.recording.data
-        events = marker_events(self.recording.sample_labels)
+        heartbeat = max(1, round(self.recording.sfreq))  # one second of recording
+        events = marker_events(self.recording.sample_labels, heartbeat)
         while True:
             t0 = self._clock()  # LSL time at which sample 0 starts being acquired
+            self.n_passes += 1
             next_event = 0
             for start in range(0, len(data), self.chunk):
                 if stop is not None and stop.is_set():
@@ -94,7 +117,8 @@ class ReplayStreamer:
                     index, name = events[next_event]
                     # Sample ``index`` is stamped t0 + (index + 1) / rate; the marker goes
                     # half a sample earlier so "last marker <= sample time" is unambiguous.
-                    self._markers.push_sample([name], t0 + (index + 0.5) / self.rate)
+                    marker = format_marker(name, self.n_passes)
+                    self._markers.push_sample([marker], t0 + (index + 0.5) / self.rate)
                     next_event += 1
                 self._eeg.push_chunk(data[start:end].tolist(), due)
                 self.n_sent += end - start
