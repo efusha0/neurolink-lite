@@ -19,14 +19,9 @@ def test_version_command() -> None:
     assert result.stdout.strip() == __version__
 
 
-def test_stub_commands_exit_with_code_2() -> None:
-    for cmd in ["demo"]:
-        result = runner.invoke(app, [cmd])
-        assert result.exit_code == 2, cmd
-
-
 def test_realtime_commands_are_registered() -> None:
-    for cmd in ["stream", "serve", "latency", "train-demo", "pseudo-online"]:
+    # Only --help: `demo` and `serve` block until Ctrl+C when they are really run.
+    for cmd in ["stream", "serve", "latency", "train-demo", "pseudo-online", "demo"]:
         result = runner.invoke(app, [cmd, "--help"])
         assert result.exit_code == 0, cmd
 
