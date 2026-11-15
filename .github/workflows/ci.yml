@@ -9,11 +9,11 @@ jobs:
   python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           enable-cache: true
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Install liblsl (needed by pylsl on Linux)
@@ -31,19 +31,27 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22 is the oldest supported line (vitest 5 needs Node >= 22.12) and ships npm 10;
+        # 24 is the current LTS and ships npm 11. The two npm majors disagree about what a
+        # complete package-lock.json is, so `npm ci` has to pass on both.
+        node-version: ["22", "24"]
     defaults:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          # vitest 5 needs Node >= 22.12. "22" resolves to the newest 22.x release; the
-          # step below fails the job if that ever is older than the minimum.
-          node-version: "22"
+          # A bare major resolves to its newest release; the step below fails the job if
+          # that ever is older than the minimum.
+          node-version: ${{ matrix.node-version }}
       - name: Check the Node.js version (>= 22.12)
         run: |
           node --version
+          npm --version
           node -e "const [a, b] = process.versions.node.split('.').map(Number); if (a < 22 || (a === 22 && b < 12)) { console.error('Node >= 22.12 is required'); process.exit(1); }"
       - name: Install dependencies
         run: npm ci
