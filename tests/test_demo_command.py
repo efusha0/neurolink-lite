@@ -322,6 +322,15 @@ def test_demo_command_serves_the_page_and_live_predictions(
     assert "NeuroLink-lite is running: http://127.0.0.1:" in result.output
     assert "has never seen S007" in result.output and "stopped after" in result.output
 
+    # Without --no-open the page is opened in the browser once the server is up.
+    opened: list[str] = []
+    monkeypatch.setattr("webbrowser.open", lambda url: opened.append(url) or True)
+    port = free_port()
+    args = [a for a in demo_args(tmp_path, monkeypatch, port) if a != "--no-open"]
+    result = runner.invoke(cli.app, [*args, "--duration", "0.5"])
+    assert result.exit_code == 0, result.output
+    assert opened == [f"http://127.0.0.1:{port}/"]
+
 
 def test_demo_refuses_a_port_that_is_taken() -> None:
     bundle = DemoBundle(PowerModel(), ("C3", "C4"), (8.0, 30.0), False, 0.5)

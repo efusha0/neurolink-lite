@@ -9,6 +9,7 @@ with a message that says what to do.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import re
@@ -156,7 +157,13 @@ def built_ui(frontend: Path = FRONTEND_DIR) -> Path | None:
 
 # -------------------------------------------------------------------------------- running
 def port_is_free(host: str, port: int) -> bool:
+    """True if a server can listen on ``host:port`` now."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        if os.name != "nt":
+            # As uvicorn binds: a port whose last server has just stopped still has
+            # connections in TIME_WAIT on Linux and macOS, and is free all the same. Not on
+            # Windows, where this option would let the bind succeed on a port that is in use.
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             s.bind((host, port))
         except OSError:
@@ -224,7 +231,9 @@ def run_demo(
                 server.should_exit = True
 
         threading.Thread(target=watch, daemon=True).start()
-        server.run()  # returns on Ctrl+C or when `should_exit` is set
+        # On Ctrl+C uvicorn shuts down gracefully and then raises the signal again.
+        with contextlib.suppress(KeyboardInterrupt):
+            server.run()  # returns when `should_exit` is set
         worker_error = getattr(getattr(live.app.state, "worker", None), "error", None)
     finally:
         if live is not None:
