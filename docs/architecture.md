@@ -258,7 +258,51 @@ decisions that are not obvious from the code.
   forcing it, the two packages were raised by hand to the current majors (vite 5 -> 8,
   vitest 2 -> 5) and checked: type-check, the unit tests, the production build and the
   dev server with its WebSocket proxy in a real browser. `npm audit` now reports no
-  vulnerabilities. vitest 5 needs Node >= 22.12; CI runs Node 22.
+  vulnerabilities. vitest 5 needs Node >= 22.12; CI runs Node 22 and 24 (see Phase 6).
 - **The UI has no end-to-end browser test.** The game, the counters, the buffers and the
   message parsing are pure modules covered by vitest; drawing and the WebSocket wiring
   were checked by running the stack and looking at screenshots.
+
+## Decisions (Phase 6)
+
+- **One process for the demo.** `neurolink demo` runs the replay streamer (a thread), the
+  online decoder and the FastAPI server in one process and serves the built page from the
+  same port as the WebSocket (`/`, `/assets/...`; the API routes are registered first and
+  are not shadowed). The LSL streams get process-specific names, so the demo does not mix
+  with a `neurolink stream` that may be running. Ctrl+C stops uvicorn; the inlets are
+  closed before the streamer stops, so liblsl has no broken stream to report. A port that
+  is taken is reported before anything is started.
+- **Ctrl+C was checked with a real Ctrl+C.** uvicorn shuts down gracefully on SIGINT and
+  then raises the signal again; `run_demo` swallows that one `KeyboardInterrupt`, so the
+  command ends with its summary line instead of a traceback. On Windows, with a WebSocket
+  client still connected, a console Ctrl+C ended `uv run neurolink demo` within 2 s, the
+  port was free again and no process was left behind. The port check binds the way
+  uvicorn does (`SO_REUSEADDR`, except on Windows, where that option means something
+  else): without it Linux reported the port as taken for a while after a demo had
+  stopped, because of connections in TIME_WAIT.
+- **The demo model is committed, the data is not.** `data/models/demo_model.pt` is 17 kB:
+  EEGNet weights, normalization statistics, channel names and the online settings, no
+  EEG. It is the one exception to "nothing under `data/` is committed", so that a clone
+  can run the demo without the 0.8 GB download and the training. A test checks that the
+  file loads and that the demo subject is not among its training subjects. If the file is
+  missing, the command prints the `download` and `train-demo` commands.
+- **The demo downloads one recording.** Without `S007R12.edf` under `data/raw`, the demo
+  fetches that file from PhysioNet (2.6 MB) through the same loader as everything else; a
+  failed download is reported with the dataset URL.
+- **The UI is built on the first run; `frontend/dist` is not committed.** A built bundle
+  in git goes stale and hides what produced it. The demo runs `npm ci` and
+  `npm run build` when `dist` is missing or older than the UI sources (`--rebuild-ui`
+  forces it), and `npm ci` only when `node_modules` is missing or older than the lock
+  file. Without Node.js, or with one older than 22.12, the command stops with a message
+  that says what to install. `neurolink serve` offers a built page but never builds it.
+- **The lock file has to satisfy npm 10 and npm 11.** The lock file written by npm 11 on
+  Windows left out `@emnapi/core` and `@emnapi/runtime` (dependencies of the optional
+  `@rolldown/binding-wasm32-wasi`). npm 11 accepts that, npm 10 (the one in Node 22) does
+  not: `npm ci` failed with "Missing: @emnapi/runtime@2.0.0-beta.2 from lock file", which
+  turned the frontend CI job red after the vite 8 upgrade and would have broken the first
+  demo run on Node 22. The two entries were added with npm 10, and CI now runs the
+  frontend job on Node 22 and Node 24 so that both npm majors are checked.
+- **Verified in a fresh clone.** `git clone`, `uv sync`, `uv run neurolink demo` with no
+  data, no `node_modules` and no `dist`: the recording was downloaded, the UI built and
+  the page was up after about 50 s; 26 of 35 cue windows of the first 20 s were decoded
+  correctly.

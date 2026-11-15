@@ -1,13 +1,69 @@
 # NeuroLink-lite: Thought-Controlled Cursor (EEG + Deep Learning)
 
-> **Status:** work in progress. Data pipeline, CSP+LDA baseline, EEGNet, the real-time
-> system (LSL replay, online classifier, WebSocket server) and the browser UI are done
-> (Phases 0-5); the one-command demo and the final polish (Phase 6) are next.
+[![CI](https://github.com/efusha0/neurolink-lite/actions/workflows/ci.yml/badge.svg)](https://github.com/efusha0/neurolink-lite/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 NeuroLink-lite is a small, honest, open-source brain-computer interface (BCI) project.
 It classifies EEG recorded while a person *imagines* moving their left or right hand, and
 uses that prediction to move a cursor in the browser in real time. There is no hardware:
 recorded data from PhysioNet is replayed over Lab Streaming Layer (LSL) as if it were live.
+
+<!-- Demo GIF: record it as described in docs/demo-gif.md, save it as docs/demo.gif,
+     uncomment the next line and delete the screenshot line below this comment (the
+     screenshot stays in the "Browser UI" section).
+![NeuroLink-lite demo: the cursor follows the decoder while subject S007's recording is replayed](docs/demo.gif)
+-->
+
+![The UI during a rest period: the decoder is 78 % sure of "right" and the cursor moves although nothing is being imagined](docs/ui.png)
+
+It is built to show the whole path from raw EEG to a moving cursor, and to report what
+that path is really worth: every number below is measured on held-out data, the demo
+subject is labelled as the best case it is, and the things that do not work are listed.
+
+## Quick start: the demo
+
+```bash
+# Needs Python 3.11+, uv (https://docs.astral.sh/uv/) and Node.js 22.12+ (https://nodejs.org)
+git clone https://github.com/efusha0/neurolink-lite.git
+cd neurolink-lite
+uv sync
+uv run neurolink demo
+```
+
+One command replays a recorded run as a live LSL stream, classifies it every 0.25 s and
+opens the page at `http://127.0.0.1:8000`. Stop it with Ctrl+C. Nothing has to be trained:
+
+- **Model.** The trained demo model ships with the repository
+  (`data/models/demo_model.pt`, 17 kB; see [Data & License](#data--license)).
+- **Recording.** The one run that is replayed (subject S007, run 12, 2.6 MB) is downloaded
+  from PhysioNet on the first run.
+- **Page.** The browser UI is built on the first run, which is the only step that needs
+  Node.js; without it the command says what to install. In a fresh clone the first run
+  was up after about 50 s (download, `npm ci`, build); later runs start in about 5 s.
+
+`uv run neurolink demo --help` lists the options (`--port`, `--no-open`, `--rebuild-ui`, ...).
+
+## Results at a glance
+
+Left vs right hand motor imagery, 105 subjects, chance = 50 %. Details and the reasoning
+behind every number are in the sections below.
+
+| Question | Answer |
+|---|---|
+| Offline accuracy, best model (EEGNet trained on other subjects) | 65.0 +/- 13.2 % across subjects; 35 of 105 subjects reach 70 % |
+| The same kind of model run the way a live system runs | 64.1 % while the window is inside a trial, 61.0 % over all trial windows |
+| Does it know when the user is resting? | No. 28 % of rest windows move the cursor, as many as imagery windows (29 %) |
+| Computation latency, sample to browser socket | 9.3 ms median, 15.3 ms p95 |
+| Time from a cue to the cursor moving the right way | 1.65 s median for the demo subject; for the average subject it mostly never happens within a trial |
+| "Reach the target" game, demo subject (best case) | 12 of 15 targets on the held-out run |
+| "Reach the target" game, mean of all subjects | 19.6 % of targets |
+
+**Inter-subject variability is the main story.** Per-subject accuracy ranges from below
+chance to 96 %: about a third of the subjects can be decoded usefully and many cannot be
+decoded at all with this kind of model (often called "BCI illiteracy"). The live demo
+replays subject S007, one of the easiest subjects, through a model that has never seen
+them. That is a best case, chosen by a rule and labelled as such; the average over all
+subjects is reported next to every demo number.
 
 ## Architecture
 
@@ -27,10 +83,20 @@ flowchart LR
         G --> M[demo model: cross-subject EEGNet]
         I --> J[online classifier: causal filter, 2 s window, 0.25 s step, smoothing]
         M --> J
-        J --> K[FastAPI WebSocket]
+        J --> K[FastAPI: WebSocket + built UI]
         K --> L[Browser: canvas cursor, EEG view, target game]
     end
 ```
+
+| Part | Where |
+|---|---|
+| Loading, validation, filtering, epoching, caching | `src/neurolink/data/` |
+| CSP + LDA, EEGNet, training | `src/neurolink/models/` |
+| Evaluation protocols, pseudo-online scoring, game simulation, reports | `src/neurolink/eval/` |
+| LSL streamer, online decoder, WebSocket server, demo | `src/neurolink/realtime/` |
+| Browser UI (Vite + TypeScript + Canvas, no framework) | `frontend/` |
+| Result files (JSON, markdown, figures) | `results/` |
+| Design decisions, phase by phase | [`docs/architecture.md`](docs/architecture.md) |
 
 ## Dataset
 
@@ -38,7 +104,8 @@ PhysioNet **EEG Motor Movement/Imagery Dataset** (EEGMMIDB): 109 subjects, 64 ch
 160 Hz. We use the motor-imagery runs 4, 8 and 12 (imagine opening/closing left or right
 fist). Annotations: `T0` rest, `T1` left, `T2` right. Data is downloaded with
 `mne.datasets.eegbci.load_data` into `data/` (git-ignored). Subjects with inconsistent
-sampling rate or recording length are detected, reported and skipped.
+sampling rate or recording length are detected, reported and skipped. Citations and
+license: [Data & License](#data--license).
 
 ## Results
 
@@ -277,40 +344,46 @@ decoder step (0.25 s), whether or not the browser drew a frame in between. The f
 version moved the cursor only when a frame was drawn, and a browser tab in the background
 draws none: with the page left open behind another window it showed 24 hits in 52 trials
 with 28 timeouts, while the decoder was right in 87 % of the cue windows. That was a bug
-of the page, not a property of the decoder. Checked in headless Chrome after the fix, with the tab hidden for more than four minutes: the pass played entirely in the background scored 12 of 15 hits with no wrong-side hit, and the pass the page had joined after its first trial 12 of 14, as in the simulation.
+of the page, not a property of the decoder. Checked in headless Chrome after the fix,
+with the tab hidden for more than four minutes: the pass played entirely in the background
+scored 12 of 15 hits with no wrong-side hit, and the pass the page had joined after its
+first trial 12 of 14, as in the simulation.
 
 ## How to run
+
+The demo needs only the [quick start](#quick-start-the-demo). Everything else reproduces
+the results from scratch.
 
 ```bash
 # Requires Python 3.11+ and uv (https://docs.astral.sh/uv/)
 uv sync --extra dev
 uv run neurolink --help
 
-# Phase 1: fetch and preprocess the development subset (subjects 1-10, ~75 MB)
+# Data pipeline on the development subset (subjects 1-10, ~75 MB)
 uv run neurolink download --subjects dev
 uv run neurolink preprocess --subjects dev            # 64 channels, CAR on
 uv run neurolink preprocess --subjects dev --channels motor --no-car
 ```
 
-Offline experiments and the real-time system (all 109 subjects, about 0.8 GB of EDF files):
+Offline experiments and the real-time measurements (all 109 subjects, about 0.8 GB of EDF
+files):
 
 ```bash
 uv run neurolink download --subjects all
-uv run neurolink train-csp                    # Phase 2: CSP + LDA, both protocols
+uv run neurolink train-csp                    # CSP + LDA, both protocols
 uv run neurolink train-csp --channels motor
-uv run neurolink train-eegnet                 # Phase 3: EEGNet, both protocols
-uv run neurolink pseudo-online                # Phase 4: online pipeline on held-out data
+uv run neurolink train-eegnet                 # EEGNet, both protocols
+uv run neurolink pseudo-online                # online pipeline on held-out data
 uv run neurolink train-demo                   # trains and saves data/models/demo_model.pt
-
-uv run neurolink stream                       # terminal 1: replay the demo run over LSL
-uv run neurolink serve                        # terminal 2: classifier + WebSocket server
 uv run neurolink latency                      # end-to-end latency measurement
 uv run neurolink behavioural-latency          # reaction to the cue, from pseudo-online outputs
 uv run neurolink game-speed                   # cursor speed for the UI, from runs 4 and 8
+uv run neurolink report                       # regenerate results/RESULTS.md and the figures
 ```
 
 `pseudo-online` trains every candidate model and takes a while on a CPU; its results are
-committed under `results/`, so `train-demo` can be run directly.
+committed under `results/`, so `train-demo` can be run directly. `train-demo` overwrites
+the shipped model with one trained on your machine (same data, same seed).
 
 `preprocess` writes `data/cache/dataset_<hash>.npz` (keyed by every preprocessing
 parameter) and prints which subjects were skipped and why, for example:
@@ -320,15 +393,18 @@ skipped subjects (1):
   S088: run 4: sampling rate 128 Hz != 160 Hz; run 8: ...; run 12: ...
 ```
 
-Browser UI (Vite + TypeScript), with `neurolink stream` and `neurolink serve` running:
+The demo, piece by piece (what `neurolink demo` does in one process):
 
 ```bash
-cd frontend
-npm install        # Node 22.12 or newer
-npm run dev        # then open http://localhost:5173
+uv run neurolink stream                       # terminal 1: replay the demo run over LSL
+uv run neurolink serve                        # terminal 2: classifier + WebSocket server
+cd frontend && npm install && npm run dev     # terminal 3: UI with hot reload, http://localhost:5173
 ```
 
-What the page shows and how the game is scored: see "Browser UI" above.
+`neurolink serve` also serves the built page on `http://127.0.0.1:8000` when
+`frontend/dist` exists.
+
+To record the demo GIF shown at the top, see [`docs/demo-gif.md`](docs/demo-gif.md).
 
 ## Development
 
@@ -336,37 +412,93 @@ What the page shows and how the game is scored: see "Browser UI" above.
 uv run ruff check . && uv run ruff format .
 uv run mypy
 uv run pytest
+
+cd frontend                                   # Node.js 22.12 or newer
+npm ci
+npm run typecheck && npm test && npm run build
 ```
+
+CI (GitHub Actions) runs the same checks on every push.
 
 ## Limitations
 
-_To be written in Phase 6._ Honest notes about accuracy ceilings on EEGMMIDB,
-cross-subject generalization, and the gap between replayed data and a live headset.
-
-Points already known and to be covered there:
-
-- The 10 development subjects (1-10) used for sanity sweeps and for choosing the EEGNet
-  training budget are also part of the 105-subject evaluation, so reported accuracies
-  carry a small optimistic bias.
-- Offline accuracy uses cue-aligned epochs and a zero-phase filter; the online system
-  cannot. The pseudo-online accuracy measured in Phase 4 is the honest estimate. Include
-  the offline vs pseudo-online comparison table (see "Real-time system").
-- Measured cost of the filter mismatch (zero-phase training, causal online filter): not
-  significant, -0.1 to +0.3 points, p = 0.41-0.83.
-- Loss from window alignment: 3-5 points from offline accuracy to all live trial windows
-  (5 points for the demo model, 66.0 to 61.0 %).
-- The model does not detect rest. The confidence threshold only mutes low-confidence
+- **Accuracy is low in absolute terms.** The best model is right about 65 % of the time on
+  a two-class problem where chance is 50 %, and only a third of the subjects reach the
+  70 % usually quoted as the minimum for a usable BCI. This is in line with what is
+  reported for EEGMMIDB with few trials per subject; it is not state of the art, and no
+  hyper-parameter search was done beyond the EEGNet defaults and a training budget.
+- **Large inter-subject variability ("BCI illiteracy").** Per-subject accuracy spans 29 %
+  to 96 % for the cross-subject EEGNet. The demo subject (S007) is a best case and the
+  average is reported next to it; for most subjects the system is not a usable controller.
+- **The 10 development subjects overlap the evaluation set.** Subjects 1-10 were used for
+  sanity sweeps and for choosing the EEGNet training budget, and they are also part of
+  the 105-subject evaluation, so the reported accuracies carry a small optimistic bias.
+- **Offline accuracy is not live accuracy.** Offline numbers use cue-aligned epochs and a
+  zero-phase filter; a live system has neither. The pseudo-online accuracy is the honest
+  estimate (see the offline vs pseudo-online table): the filter mismatch costs nothing
+  measurable (-0.1 to +0.3 points, p = 0.41-0.83), window alignment costs 3-5 points from
+  offline accuracy to all live trial windows (5 points for the demo model, 66.0 to
+  61.0 %).
+- **The model does not detect rest.** The confidence threshold only mutes low-confidence
   predictions; rest windows move the cursor as often as imagery windows (28 % vs 29 %).
-  This is the "Midas touch" problem.
-- The demo model was the best of eight candidates on the same held-out data, so its own
-  pseudo-online number is slightly optimistic (selection among candidates).
-- Latency excludes browser rendering and was measured on one machine with replayed data.
-  It is computation latency only: the behavioural latency (cue to the cursor moving the
-  right way) is about 1.65 s for the demo subject, and for the average subject the
-  cursor mostly never gets there within a trial.
-- Large inter-subject variability ("BCI illiteracy"); the demo subject (S007) is a best
-  case and the average is reported next to it.
+  This is the "Midas touch" problem, and it would make free, self-paced control
+  impossible even for a well-decoded subject.
+- **Selection effects.** The demo model was the best of eight candidates on the same
+  held-out data, so its own pseudo-online number is slightly optimistic. The demo subject
+  was picked for being easy to decode (on runs 4 and 8), and the replayed run 12 then
+  turned out to be the better part of that subject's data.
+- **Small numbers behind the demo.** Run 12 holds 15 trials: "12 of 15 targets" and
+  "1.65 s" are coarse estimates for one subject on one run.
+- **Latency is computation latency.** The 9-15 ms exclude browser rendering and were
+  measured on one machine with replayed data. The behavioural latency (cue to the cursor
+  moving the right way) is about 1.65 s for the demo subject, and for the average subject
+  the cursor mostly never gets there within a trial.
+- **Replayed data is not a live headset.** The recording is open loop: the person never
+  saw this cursor, so there is no feedback, no learning and no frustration, all of which
+  change the EEG in a real session. There are no fresh electrode problems, no movement
+  artefacts beyond those already in the data, and no clock drift. The target game follows
+  the recording because nobody is steering.
+- **One dataset, one session per subject, two classes.** Nothing here says how the models
+  would do on another amplifier, on another day for the same person, or with more
+  commands.
+- **The page is tested as logic, not as a page.** Game, counters, buffers and message
+  parsing have unit tests; drawing and the WebSocket wiring were checked by running the
+  stack in a real browser, not by an automated end-to-end test.
 
-## License
+## Data & License
 
-MIT
+**Data.** All EEG comes from the EEG Motor Movement/Imagery Dataset on PhysioNet
+(https://physionet.org/content/eegmmidb/1.0.0/), recorded with the BCI2000 system. The
+dataset is made available under the **Open Data Commons Attribution License v1.0
+(ODC-By v1.0)**, https://opendatacommons.org/licenses/by/1-0/. No recording is stored in
+this repository; the code downloads what it needs from PhysioNet. If you use the data,
+cite:
+
+- Schalk, G., McFarland, D. J., Hinterberger, T., Birbaumer, N., & Wolpaw, J. R. (2009).
+  *EEG Motor Movement/Imagery Dataset* (version 1.0.0). PhysioNet.
+  https://doi.org/10.13026/C28G6P
+- Schalk, G., McFarland, D. J., Hinterberger, T., Birbaumer, N., & Wolpaw, J. R. (2004).
+  BCI2000: A General-Purpose Brain-Computer Interface (BCI) System. *IEEE Transactions on
+  Biomedical Engineering*, 51(6), 1034-1043. https://doi.org/10.1109/TBME.2004.827072
+- Goldberger, A. L., et al. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components
+  of a New Research Resource for Complex Physiologic Signals. *Circulation*, 101(23),
+  e215-e220. https://doi.org/10.1161/01.CIR.101.23.e215
+
+**Demo model.** `data/models/demo_model.pt` (17 kB) is an EEGNet-8,2 trained with this
+code on that dataset: the motor-imagery runs 4, 8 and 12 of 84 subjects (3780 epochs), 21
+channels over the motor cortex, common average reference, causal 8-30 Hz band-pass, 30
+training epochs, seed 42. It is the model of the cross-subject fold that holds out the
+demo subject S007 and 20 others, so it has never seen the subject it is shown on. The
+file contains network weights, per-channel normalization statistics, channel names and
+the online settings (window, step, smoothing, confidence threshold); it contains no EEG
+recordings. As a work derived from the dataset it is shared with the attribution above.
+`uv run neurolink train-demo` reproduces it.
+
+**Results.** The numbers, tables and figures under `results/` are derived from the same
+dataset; the attribution above applies to them as well.
+
+**Code.** MIT, see [`LICENSE`](LICENSE).
+
+**Methods.** EEGNet: Lawhern, V. J., et al. (2018). EEGNet: a compact convolutional neural
+network for EEG-based brain-computer interfaces. *Journal of Neural Engineering*, 15(5),
+056013. https://doi.org/10.1088/1741-2552/aace8c
