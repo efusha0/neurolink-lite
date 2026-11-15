@@ -76,6 +76,7 @@ predictions (the "Midas touch" problem of BCIs).
 - Small, meaningful commits (conventional commits).
 - When unsure, don't assume — ask.
 - Push to GitHub at the end of every phase without asking.
+- Never use stored git or GitHub credentials for API calls without asking first.
 
 ## Progress
 Update this checklist when I approve a phase.
@@ -85,4 +86,4 @@ Update this checklist when I approve a phase.
 - [x] Phase 3 — EEGNet
 - [x] Phase 4 — Real-time system
 - [x] Phase 5 — UI
-- [ ] Phase 6 — Polish
+- [x] Phase 6 — Polish
