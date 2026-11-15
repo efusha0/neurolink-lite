@@ -8,13 +8,7 @@ It classifies EEG recorded while a person *imagines* moving their left or right 
 uses that prediction to move a cursor in the browser in real time. There is no hardware:
 recorded data from PhysioNet is replayed over Lab Streaming Layer (LSL) as if it were live.
 
-<!-- Demo GIF: record it as described in docs/demo-gif.md, save it as docs/demo.gif,
-     uncomment the next line and delete the screenshot line below this comment (the
-     screenshot stays in the "Browser UI" section).
 ![NeuroLink-lite demo: the cursor follows the decoder while subject S007's recording is replayed](docs/demo.gif)
--->
-
-![The UI during a rest period: the decoder is 78 % sure of "right" and the cursor moves although nothing is being imagined](docs/ui.png)
 
 It is built to show the whole path from raw EEG to a moving cursor, and to report what
 that path is really worth: every number below is measured on held-out data, the demo
